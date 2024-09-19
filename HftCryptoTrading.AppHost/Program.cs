@@ -10,4 +10,7 @@ builder.AddProject<Projects.HftCryptoTrading_Web>("webfrontend")
     .WithReference(apiService);
 
 
+builder.AddProject<Projects.HftCryptoTrading_Saga_MarketDownloader>("hftcryptotrading-saga-marketdownloader");
+
+
 builder.Build().Run();

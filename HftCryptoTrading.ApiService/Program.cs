@@ -1,4 +1,5 @@
 using HftCryptoTrading.ApiService.Hubs;
+using HftCryptoTrading.ServiceDefaults;
 
 AppDomain.CurrentDomain.UnhandledException += (object sender, UnhandledExceptionEventArgs e) =>
 {
