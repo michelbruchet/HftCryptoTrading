@@ -53,6 +53,13 @@ public class OpentelemetryMetricService : IMetricService
         _requestCounter.Add(1);
     }
 
+    public void TrackFailure(string operationName)
+    {
+        using var activity = ActivitySource.StartActivity(operationName + ".failure");
+        activity?.SetTag("error", true);
+        _requestCounter.Add(1);
+    }
+
     private class TrackingScope : IDisposable
     {
         private readonly Action _onDispose;

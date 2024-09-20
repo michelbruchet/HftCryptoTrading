@@ -6,7 +6,7 @@ using HftCryptoTrading.Shared.Models;
 
 namespace HftCryptoTrading.Saga.MarketDownloader.Workers;
 
-public class MarketDownloaderSaga(AppSettings appSetting)
+public class MarketDownloaderSaga(AppSettings appSetting) : IMarketDownloaderSaga
 {
     private readonly string _hubUrl = appSetting.Hub.HubApiUrl;
     private readonly string _hubApiKey = appSetting.Hub.HubApiKey;
