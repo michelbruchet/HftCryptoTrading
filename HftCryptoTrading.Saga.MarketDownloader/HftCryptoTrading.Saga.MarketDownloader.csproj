@@ -9,6 +9,7 @@
   </PropertyGroup>
 
 	<ItemGroup>
+		<PackageReference Include="MediatR" Version="12.4.1" />
 		<PackageReference Include="MessagePack" Version="2.5.172" />
 		<PackageReference Include="MessagePack.ReactiveProperty" Version="2.5.172" />
 		<PackageReference Include="MessagePackAnalyzer" Version="2.5.172">

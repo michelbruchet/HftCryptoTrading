@@ -1,9 +1,10 @@
-﻿using HftCryptoTrading.Saga.MarketDownloader.Processes;
+﻿using HftCryptoTrading.Exchanges.Core.Exchange;
+using HftCryptoTrading.Saga.MarketDownloader.Processes;
 using System.Collections.Concurrent;
 
 namespace HftCryptoTrading.Saga.MarketDownloader.Workers;
 
-public class MarketDownloaderSagaHost(MarketDownloaderSaga saga, DownloadWorkerProcess downloadWorkerService) : BackgroundService
+public class MarketDownloaderSagaHost(MarketDownloaderSaga saga) : BackgroundService
 {
     public override async Task StartAsync(CancellationToken cancellationToken)
     {
@@ -21,8 +22,7 @@ public class MarketDownloaderSagaHost(MarketDownloaderSaga saga, DownloadWorkerP
     {
         while (!stoppingToken.IsCancellationRequested)
         {
-            await Task.Delay(TimeSpan.FromHours(5));
-            await downloadWorkerService.DownloadSymbols();
+            await Task.Delay(TimeSpan.FromMinutes(1), stoppingToken);
         }
     }
 }

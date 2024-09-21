@@ -6,8 +6,9 @@ using System.Threading.Tasks;
 
 namespace HftCryptoTrading.Shared.Models;
 
-public class SymbolTickerData
+public class SymbolTickerData(string exchange)
 {
+    public string Exchange { get; } = exchange;
     public SymbolData Symbol { get; set; }
     public TickerData Ticker { get; set; }
     public DateTime PublishedDate { get; set; }

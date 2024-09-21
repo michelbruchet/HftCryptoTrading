@@ -32,7 +32,7 @@ public class DownloadWorkerProcess
             );
     }
 
-    public async Task DownloadSymbols()
+    public async Task DownloadSymbols(CancellationToken cancellationToken = default)
     {
         List<SymbolData> symbols;
         List<TickerData> tickers;
@@ -94,7 +94,7 @@ public class DownloadWorkerProcess
             tickers,
             symbol => symbol.Symbol,
             ticker => ticker.Symbol,
-            (symbol, ticker) => new SymbolTickerData
+            (symbol, ticker) => new SymbolTickerData(_exchange.ExchangeName)
             {
                 Symbol = symbol,
                 Ticker = ticker,

@@ -10,6 +10,11 @@ namespace HftCryptoTrading.Exchanges.Core.Exchange;
 public interface IExchangeClient : IDisposable, IAsyncDisposable
 {
     /// <summary>
+    /// Specify the Exchange Name
+    /// </summary>
+    string ExchangeName { get; }
+
+    /// <summary>
     /// Retrieve the list of symbols or products on the Exchange
     /// </summary>
     /// <returns></returns>

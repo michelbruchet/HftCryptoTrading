@@ -1,5 +1,7 @@
 using HftCryptoTrading.Exchanges.BinanceExchange;
 using HftCryptoTrading.Exchanges.Core.Exchange;
+using HftCryptoTrading.Saga.MarketDownloader.Handlers;
+using HftCryptoTrading.Saga.MarketDownloader.Processes;
 using HftCryptoTrading.Saga.MarketDownloader.Workers;
 using HftCryptoTrading.ServiceDefaults;
 using HftCryptoTrading.Shared;
@@ -30,7 +32,8 @@ builder.Services.AddCors(options =>
         });
 });
 
-builder.Services.AddSingleton<AppSettings>();
+// Bind AppSettings to the configuration section in appsettings.json
+builder.Services.Configure<AppSettings>(builder.Configuration);
 
 builder.Services.AddSingleton<ExchangeProviderFactory>(sp =>
 {
@@ -39,15 +42,17 @@ builder.Services.AddSingleton<ExchangeProviderFactory>(sp =>
     ExchangeProviderFactory.RegisterExchange("Binance", loggerFactory, (appSettings, loggerFactory) => new BinanceDownloadMarketClient(appSettings,
         loggerFactory.CreateLogger<BinanceDownloadMarketClient>()));
 
-    var factory = new ExchangeProviderFactory(loggerFactory);
-    var appSettings = new AppSettings();
-
-    return factory;
+    return new ExchangeProviderFactory(loggerFactory);
 });
 
 builder.Services.AddSingleton<MarketDownloaderSagaHost>();
 builder.Services.AddSingleton<MarketDownloaderSaga>();
 builder.Services.AddHostedService<MarketDownloaderSagaHost>();
+
+builder.Services.AddMediatR(option=>
+    {
+        option.RegisterServicesFromAssembly(typeof(NewSymbolTickerDataHandler).Assembly);
+    });
 
 var app = builder.Build();
 

@@ -16,6 +16,8 @@ public class BinanceDownloadMarketClient : IExchangeClient
     private BinanceRestClient _binanceExchangeClient;
     private ILogger<BinanceDownloadMarketClient> _logger;
 
+    public string ExchangeName => "Binance";
+
     public BinanceDownloadMarketClient(AppSettings appSettings, ILogger<BinanceDownloadMarketClient> logger)
     {
         BinanceRestClient.SetDefaultOptions(options =>
