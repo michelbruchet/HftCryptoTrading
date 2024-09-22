@@ -56,6 +56,8 @@ builder.Services.AddMediatR(option=>
         option.RegisterServicesFromAssembly(typeof(NewSymbolTickerDataHandler).Assembly);
     });
 
+builder.AddRedisDistributedCache("cache", configureOptions: options => options.ConnectTimeout = 3000);
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

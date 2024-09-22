@@ -21,7 +21,7 @@ public class BinanceDownloadMarketClient : IExchangeClient
     private BinanceSocketClient _binanceSocketExchangeClient;
     private ILogger<BinanceDownloadMarketClient> _logger;
     private IMediator _mediator;
-    private List<UpdateSubscription> _activeSubscriptions;
+    private List<UpdateSubscription> _activeSubscriptions = new();
 
     public string ExchangeName => "Binance";
 

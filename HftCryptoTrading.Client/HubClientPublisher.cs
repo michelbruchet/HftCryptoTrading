@@ -23,11 +23,29 @@ public class HubClientPublisher : IMessageHub
         _eventName = eventName;
     }
 
-    public HubClientPublisher(string hubUrl)
-    {
-        _connection = new HubConnectionBuilder()
+    public HubClientPublisher(string hubUrl, string @namespace, string eventName)
+        :this(new HubConnectionBuilder()
             .WithUrl(hubUrl)
-            .Build();
+            .Build(), @namespace, eventName)
+    {
+    }
+
+    public HubClientPublisher(AppSettings appSetting, string eventName):
+        this(new HubConnectionBuilder()
+        .WithUrl($"{appSetting.Hub.HubApiUrl.TrimEnd('/')}/messages", options =>
+        {
+            options.Headers.Add("x-Api-Key", appSetting.Hub.HubApiKey);
+            options.Headers.Add("x-Api-Secret", appSetting.Hub.HubApiSecret);
+        })
+        .WithAutomaticReconnect(new[]
+        {
+            TimeSpan.FromSeconds(0),
+            TimeSpan.FromSeconds(2),
+            TimeSpan.FromSeconds(10),
+            TimeSpan.FromSeconds(30)
+        })
+        .Build(), appSetting.Hub.NameSpace, eventName)
+    {
     }
 
     public async Task StartAsync(string @namespace)
@@ -38,6 +56,8 @@ public class HubClientPublisher : IMessageHub
         _namespace = @namespace;
 
         Console.WriteLine("Publisher connected to the hub.");
+
+        await _connection.StartAsync();
         await Subscribe(@namespace, _eventName);
     }
 

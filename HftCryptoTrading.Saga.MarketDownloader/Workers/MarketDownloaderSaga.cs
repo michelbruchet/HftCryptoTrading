@@ -20,7 +20,6 @@ public class MarketDownloaderSaga : IMarketDownloaderSaga
     private readonly ExchangeProviderFactory _factory;
     private readonly IMetricService _metricService;
     private readonly ILoggerFactory _loggerFactory;
-    private readonly HubConnection _hubConnection;
     private readonly List<Task> _downloadTasks = new(); // List to store ongoing tasks
     private readonly CancellationTokenSource _cancellationTokenSource = new(); // Cancellation source to stop tasks
     private readonly TimeSpan _delayBetweenDownloads = TimeSpan.FromHours(5); // Interval of 5 hours between downloads
@@ -33,23 +32,8 @@ public class MarketDownloaderSaga : IMarketDownloaderSaga
         _factory = factory;
         _metricService = metricService;
         _loggerFactory = loggerFactory;
-
-        _hubConnection = new HubConnectionBuilder()
-            .WithUrl($"{_appSetting.Hub.HubApiUrl.TrimEnd('/')}/messages", options =>
-            {
-                options.Headers.Add("x-Api-Key", _appSetting.Hub.HubApiKey);
-                options.Headers.Add("x-Api-Secret", _appSetting.Hub.HubApiSecret);
-            })
-            .WithAutomaticReconnect(new[]
-            {
-                TimeSpan.FromSeconds(0),
-                TimeSpan.FromSeconds(2),
-                TimeSpan.FromSeconds(10),
-                TimeSpan.FromSeconds(30)
-            })
-            .Build();
-
-        _publisher = new HubClientPublisher(_hubConnection, _appSetting.Hub.NameSpace, typeof(SymbolAnalysePriceEvent).Name);
+       
+        _publisher = new HubClientPublisher(_appSetting, typeof(SymbolAnalysePriceEvent).Name);
     }
 
     public async Task StartAsync(CancellationToken cancellationToken)

@@ -60,6 +60,8 @@ public class AnalyseWorkerProcess
                     var bookPrice = bookPrices.FirstOrDefault(b => b.Symbol == symbol.Symbol.Symbol);
                     if (bookPrice == null) continue;
 
+                    symbol.BookPrice = bookPrice;
+
                     bool abnormalPriceSymbol = await IsAbnormalPrice(symbol);
                     bool abnormalVolumeSymbol = await IsAbnormalVolume(symbol);
                     bool abnormalSpreadSymbol = await IsAbnormalSpread(symbol);
@@ -241,8 +243,15 @@ public class AnalyseWorkerProcess
     {
         using (_metricService.StartTracking("SetToCacheAsync"))
         {
-            byte[] serializedData = MessagePackSerializer.Serialize(data);
-            await _distributedCache.SetAsync(cacheKey, serializedData);
+            try
+            {
+                byte[] serializedData = MessagePackSerializer.Serialize(data);
+                await _distributedCache.SetAsync(cacheKey, serializedData);
+            }
+            catch(Exception ex)
+            {
+                _metricService.TrackFailure("SetToCacheAsync", ex);
+            }
         }
     }
 
