@@ -1,3 +1,4 @@
+using HftCryptoTrading.ServiceDefaults;
 using HftCryptoTrading.Web;
 using HftCryptoTrading.Web.Components;
 

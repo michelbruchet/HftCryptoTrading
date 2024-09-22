@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace HftCryptoTrading.Client;
 
-internal class HubClientPublisher : IMessageHub
+public class HubClientPublisher : IMessageHub
 {
     private readonly HubConnection _connection;
     private string _namespace;
@@ -23,23 +23,42 @@ internal class HubClientPublisher : IMessageHub
         _eventName = eventName;
     }
 
-    public HubClientPublisher(string hubUrl)
-    {
-        _connection = new HubConnectionBuilder()
+    public HubClientPublisher(string hubUrl, string @namespace, string eventName)
+        :this(new HubConnectionBuilder()
             .WithUrl(hubUrl)
-            .Build();
+            .Build(), @namespace, eventName)
+    {
     }
 
-    public async Task StartAsync(string @namespace, string eventName)
+    public HubClientPublisher(AppSettings appSetting, string eventName):
+        this(new HubConnectionBuilder()
+        .WithUrl($"{appSetting.Hub.HubApiUrl.TrimEnd('/')}/messages", options =>
+        {
+            options.Headers.Add("x-Api-Key", appSetting.Hub.HubApiKey);
+            options.Headers.Add("x-Api-Secret", appSetting.Hub.HubApiSecret);
+        })
+        .WithAutomaticReconnect(new[]
+        {
+            TimeSpan.FromSeconds(0),
+            TimeSpan.FromSeconds(2),
+            TimeSpan.FromSeconds(10),
+            TimeSpan.FromSeconds(30)
+        })
+        .Build(), appSetting.Hub.NameSpace, eventName)
+    {
+    }
+
+    public async Task StartAsync(string @namespace)
     {
         ArgumentNullException.ThrowIfNullOrWhiteSpace(nameof(@namespace));
-        ArgumentNullException.ThrowIfNullOrWhiteSpace(nameof(eventName));
+        ArgumentNullException.ThrowIfNullOrWhiteSpace(nameof(_eventName));
 
         _namespace = @namespace;
-        _eventName = eventName;
 
         Console.WriteLine("Publisher connected to the hub.");
-        await Subscribe(@namespace, eventName);
+
+        await _connection.StartAsync();
+        await Subscribe(@namespace, _eventName);
     }
 
     public async Task StopAsync()
@@ -60,11 +79,11 @@ internal class HubClientPublisher : IMessageHub
     /// Broadcasts a strongly-typed event with data validation using ValidationContext.
     /// Serializes the message and creates an EventMessage object.
     /// </summary>
-    public async Task<OperationResult> BroadcastEvent<T>(Guid id, string @namespace, string eventName, T message)
+    public async Task<OperationResult> BroadcastEvent<T>(Guid id, string @namespace, T message)
     {
         ArgumentNullException.ThrowIfNull(message, nameof(message));
         ArgumentException.ThrowIfNullOrWhiteSpace(@namespace, nameof(@namespace));
-        ArgumentException.ThrowIfNullOrWhiteSpace(eventName, nameof(eventName));
+        ArgumentException.ThrowIfNullOrWhiteSpace(_eventName, nameof(_eventName));
 
         if(id == Guid.Empty) throw new ArgumentNullException(nameof(id));
 
@@ -82,7 +101,7 @@ internal class HubClientPublisher : IMessageHub
         }
 
         // Create an EventMessage and set the serialized payload
-        var eventMessage = new EventMessage(id, @namespace, eventName);
+        var eventMessage = new EventMessage(id, @namespace, _eventName);
 
         // Serialize the payload
         eventMessage.SetPayload(message);

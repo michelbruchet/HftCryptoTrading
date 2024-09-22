@@ -1,0 +1,6 @@
+@HftCryptoTrading.Saga.MarketDownloader_HostAddress = http://localhost:5263
+
+GET {{HftCryptoTrading.Saga.MarketDownloader_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

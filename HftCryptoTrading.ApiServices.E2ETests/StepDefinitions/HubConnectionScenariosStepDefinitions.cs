@@ -62,7 +62,7 @@ public partial class HubConnectionScenariosStepDefinitions
         _client1.ClientMessageReceived += _client1_ClientMessageReceived;
         _client1.MessageDistributedReceived += _client1_MessageDistributedReceived;
 
-        await _client1.StartAsync(@namespace, @event);
+        await _client1.StartAsync(@namespace);
     }
 
     private void _client1_MessageDistributedReceived(object? sender, Guid e)
@@ -89,7 +89,7 @@ public partial class HubConnectionScenariosStepDefinitions
         _message1Id = Guid.Parse(id);
 
         var data = new MockData(_message1Id.Value, DateTime.UtcNow);
-        await _client1.BroadcastEvent<MockData>(_message1Id.Value, @namespace, @event, data);
+        await _client1.BroadcastEvent(_message1Id.Value, @namespace, data);
     }
 
     [Then("the client should receive a delayed notification")]
@@ -109,7 +109,7 @@ public partial class HubConnectionScenariosStepDefinitions
         _client2.ClientMessageReceived += _client2_ClientMessageReceived;
         _client2.MessageDistributedReceived += _client2_MessageDistributedReceived;
 
-        await _client2.StartAsync(@namespace, @event);
+        await _client2.StartAsync(@namespace);
     }
 
     private void _client2_MessageDistributedReceived(object? sender, Guid e)

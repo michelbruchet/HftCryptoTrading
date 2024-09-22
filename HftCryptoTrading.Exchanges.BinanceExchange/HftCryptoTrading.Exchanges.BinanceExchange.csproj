@@ -1,0 +1,18 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Binance.Net" Version="10.4.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\HftCryptoTrading.Core\HftCryptoTrading.Exchanges.Core.csproj" />
+    <ProjectReference Include="..\HftCryptoTrading.Shared\HftCryptoTrading.Shared.csproj" />
+  </ItemGroup>
+
+</Project>

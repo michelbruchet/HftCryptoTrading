@@ -13,12 +13,12 @@ namespace HftCryptoTrading.Client;
 /// Client to communication with message hub
 /// </summary>
 /// <typeparam name="T"></typeparam>
-public class MessageClientHub<T>
-    where T : class
+public class MessageClientHub<T> : IMessageClientHub<T> where T : class
 {
     private readonly HubConnection _connection;
     private readonly HubClientPublisher _publisher;
     private readonly HubClientReceiver<T> _receiver;
+    private string _eventName;
 
     public event EventHandler<T> ClientMessageReceived;
     public event EventHandler<Guid> MessageDistributedReceived;
@@ -40,18 +40,19 @@ public class MessageClientHub<T>
         _receiver.ClientMessageReceived += (sender, message) => ClientMessageReceived?.Invoke(sender, message);
         _receiver.MessageDistributedReceived += (sender, id) => MessageDistributedReceived?.Invoke(sender, id);
         _receiver.DelayedNotificationReceived += (sender, id) => DelayedNotificationReceived?.Invoke(sender, id);
+        _eventName = typeof(T).Name;
     }
 
     /// <summary>
     /// Starts the publisher and receiver and start listen for the event
     /// </summary>
     /// <returns></returns>
-    public async Task StartAsync(string @namespace, string eventName)
+    public async Task StartAsync(string @namespace)
     {
         await _receiver.StartAsync();
         await _connection.StartAsync();
 
-        await _publisher.StartAsync(@namespace, eventName);
+        await _publisher.StartAsync(@namespace);
         Console.WriteLine("MessageClientHub connected to the hub.");
     }
 
@@ -63,8 +64,8 @@ public class MessageClientHub<T>
         await _connection.DisposeAsync();
     }
 
-    public async Task<OperationResult> BroadcastEvent<T>(Guid id, string @namespace, string eventName, T message)
+    public async Task<OperationResult> BroadcastEvent(Guid id, string @namespace, T message)
     {
-        return await _publisher.BroadcastEvent(id, @namespace, eventName, message);
+        return await _publisher.BroadcastEvent<T>(id, @namespace, message);
     }
 }
