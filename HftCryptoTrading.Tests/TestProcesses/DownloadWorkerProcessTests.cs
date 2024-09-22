@@ -58,7 +58,7 @@ public class DownloadWorkerProcessTests
         // Assert
         _exchangeMock.Verify(e => e.GetSymbolsAsync(), Times.Once);
         _exchangeMock.Verify(e => e.GetCurrentTickersAsync(), Times.Once);
-        _sagaMock.Verify(s => s.PublishSymbols(It.IsAny<IEnumerable<SymbolTickerData>>()), Times.Once);
+        _sagaMock.Verify(s => s.PublishSymbols(It.IsAny<string>(), It.IsAny<IEnumerable<SymbolTickerData>>()), Times.Once);
         _metricServiceMock.Verify(m => m.TrackSuccess("Download-symbols"), Times.Once);
         _metricServiceMock.Verify(m => m.TrackSuccess("Download-tickers"), Times.Once);
         _metricServiceMock.Verify(m => m.TrackSuccess("publish-symbols"), Times.Once);
@@ -109,13 +109,13 @@ public class DownloadWorkerProcessTests
 
         _exchangeMock.Setup(e => e.GetSymbolsAsync()).ReturnsAsync(symbols);
         _exchangeMock.Setup(e => e.GetCurrentTickersAsync()).ReturnsAsync(tickers);
-        _sagaMock.Setup(s => s.PublishSymbols(It.IsAny<IEnumerable<SymbolTickerData>>())).ThrowsAsync(exception);
+        _sagaMock.Setup(s => s.PublishSymbols(It.IsAny<string>(), It.IsAny<IEnumerable<SymbolTickerData>>())).ThrowsAsync(exception);
 
         // Act
         await Assert.ThrowsAsync<Exception>(() => _process.DownloadSymbols());
 
         // Assert
-        _sagaMock.Verify(s => s.PublishSymbols(It.IsAny<IEnumerable<SymbolTickerData>>()), Times.Exactly(4)); // Retry 3 times
+        _sagaMock.Verify(s => s.PublishSymbols(It.IsAny<string>(), It.IsAny<IEnumerable<SymbolTickerData>>()), Times.Exactly(4)); // Retry 3 times
         _metricServiceMock.Verify(m => m.TrackFailure("publish-symbols", exception), Times.Once);
     }
 }

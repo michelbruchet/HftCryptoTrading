@@ -4,7 +4,7 @@ using System.Collections.Concurrent;
 
 namespace HftCryptoTrading.Saga.MarketDownloader.Workers;
 
-public class MarketDownloaderSagaHost(MarketDownloaderSaga saga) : BackgroundService
+public class MarketDownloaderSagaHost(IMarketDownloaderSaga saga) : BackgroundService
 {
     public override async Task StartAsync(CancellationToken cancellationToken)
     {

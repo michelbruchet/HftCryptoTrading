@@ -1,7 +1,11 @@
 ﻿using Binance.Net.Clients;
+using Binance.Net.Interfaces.Clients;
+using CryptoExchange.Net.Objects.Sockets;
+using HftCryptoTrading.Exchanges.Core.Events;
 using HftCryptoTrading.Exchanges.Core.Exchange;
 using HftCryptoTrading.Shared;
 using HftCryptoTrading.Shared.Models;
+using MediatR;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
@@ -14,12 +18,17 @@ namespace HftCryptoTrading.Exchanges.BinanceExchange;
 public class BinanceDownloadMarketClient : IExchangeClient
 {
     private BinanceRestClient _binanceExchangeClient;
+    private BinanceSocketClient _binanceSocketExchangeClient;
     private ILogger<BinanceDownloadMarketClient> _logger;
+    private IMediator _mediator;
+    private List<UpdateSubscription> _activeSubscriptions;
 
     public string ExchangeName => "Binance";
 
-    public BinanceDownloadMarketClient(AppSettings appSettings, ILogger<BinanceDownloadMarketClient> logger)
+    public BinanceDownloadMarketClient(AppSettings appSettings, ILogger<BinanceDownloadMarketClient> logger, IMediator mediator)
     {
+        _mediator = mediator;
+
         BinanceRestClient.SetDefaultOptions(options =>
         {
             options.ApiCredentials = new CryptoExchange.Net.Authentication.ApiCredentials(appSettings.Binance.ApiKey, appSettings.Binance.ApiSecret);
@@ -31,7 +40,16 @@ public class BinanceDownloadMarketClient : IExchangeClient
             options.RateLimiterEnabled = true;
         });
 
+        BinanceSocketClient.SetDefaultOptions(options =>
+        {
+            options.ApiCredentials = new CryptoExchange.Net.Authentication.ApiCredentials(appSettings.Binance.ApiKey, appSettings.Binance.ApiSecret);
+            options.Environment = appSettings.Binance.IsBackTest ?
+                Binance.Net.BinanceEnvironment.Testnet : Binance.Net.BinanceEnvironment.Live;
+            options.RateLimiterEnabled = true;
+        });
+
         _binanceExchangeClient = new BinanceRestClient();
+        _binanceSocketExchangeClient = new BinanceSocketClient();
         _logger = logger;
     }
 
@@ -117,6 +135,26 @@ public class BinanceDownloadMarketClient : IExchangeClient
         return tickerDataList;
     }
 
+    public async Task<List<BookPriceData>> GetBookPricesAsync(IEnumerable<string> symboles)
+    {
+        var getOrderBook = await _binanceExchangeClient.SpotApi.ExchangeData.GetBookPricesAsync(symboles);
+
+        if (!getOrderBook.Success)
+        {
+            _logger.LogError($"Failed to retreive book data error:{getOrderBook.Error}");
+            throw new ApplicationException("Failed to retreive book data");
+        }
+
+        //Map the retrieved book prices to BookPriceData
+        return getOrderBook.Data.Select(p=>new BookPriceData(p.Symbol)
+        {
+            BestBidPrice= p.BestBidPrice,
+            BestAskPrice = p.BestAskPrice,
+            BestAskQuantity = p.BestAskQuantity,
+            BestBidQuantity = p.BestBidQuantity
+        }).ToList();
+    }
+
     public async Task<List<KlineData>> GetHistoricalKlinesAsync(string symbol, TimeSpan period, DateTime startTime, DateTime endTime)
     {
         var klinesResult = await _binanceExchangeClient.SpotApi.CommonSpotClient.GetKlinesAsync(symbol, period, startTime, endTime);
@@ -139,5 +177,63 @@ public class BinanceDownloadMarketClient : IExchangeClient
         });
 
         return klinesData.ToList();
+    }
+
+    public async Task RegisterPriceChangeHandlerAsync(AnalyseMarketDoneSuccessFullyEvent notification)
+    {
+        var symboles = notification.ValidSymbols.Select(symbol => symbol.Symbol.Symbol).ToList();
+
+        // Cancel any active subscriptions before creating new ones
+        await CancelActiveSubscriptions();
+
+        // Clear the list of active subscriptions since we are unsubscribing
+        _activeSubscriptions.Clear();
+
+        var subscriptionResult = await _binanceSocketExchangeClient.SpotApi.ExchangeData.SubscribeToTickerUpdatesAsync(symboles, async data =>
+        {
+            // When Binance sends a price update, publish the event via MediatR
+            var priceChangeNotification = new PriceChangeNotification
+            {
+                Symbol = data.Data.Symbol,
+                ExchangeName = ExchangeName,
+                CurrentPrice = data.Data.LastPrice,
+                OpenPrice = data.Data.OpenPrice,
+                HighPrice = data.Data.HighPrice,
+                LowPrice = data.Data.LowPrice,
+                LastQuantity = data.Data.LastQuantity,
+                BestBidQuantity = data.Data.BestBidQuantity,
+                BestAskQuantity = data.Data.BestAskQuantity,
+                BestAskPrice = data.Data.BestAskPrice,
+                BestBidPrice = data.Data.BestBidPrice,
+                LastPrice = data.Data.LastPrice,
+                CloseTime = data.Data.CloseTime,
+                OpenTime = data.Data.OpenTime,
+                PrevDayClosePrice = data.Data.PrevDayClosePrice,
+                PriceChange = data.Data.PriceChange,
+                PriceChangePercent = data.Data.PriceChangePercent,
+                QuoteVolume = data.Data.QuoteVolume,
+                Volume = data.Data.Volume,
+                WeightedAveragePrice = data.Data.WeightedAveragePrice,
+                TotalTrades = data.Data.TotalTrades
+            };
+
+            await _mediator.Publish(priceChangeNotification);
+        });
+
+        if (subscriptionResult.Success)
+        {
+            // Add the subscription to the active list
+            _activeSubscriptions.Add(subscriptionResult.Data);
+        }
+        else
+        {
+            // Handle subscription failure (log or throw an exception if necessary)
+            Console.WriteLine($"Failed to subscribe to {symboles}: {subscriptionResult.Error?.Message}");
+        }
+    }
+
+    private async Task CancelActiveSubscriptions()
+    {
+        await _binanceSocketExchangeClient.UnsubscribeAllAsync();
     }
 }

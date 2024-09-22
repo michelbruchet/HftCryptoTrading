@@ -1,19 +1,23 @@
 ﻿using HftCryptoTrading.Exchanges.Core.Events;
 using HftCryptoTrading.Saga.MarketDownloader.Processes;
-using HftCryptoTrading.Shared.Models;
 using MediatR;
 using Microsoft.Extensions.Options;
+using System.Reactive;
 
 namespace HftCryptoTrading.Saga.MarketDownloader.Handlers;
 
-public class NewSymbolTickerDataHandler(IServiceProvider serviceProvider, IOptions<AppSettings> appSettings, ILogger<NewSymbolTickerDataHandler> logger) : INotificationHandler<NewSymbolTickerDataEvent>
+public class PriceChangeNotificationHandler(
+    IServiceProvider serviceProvider, 
+    IOptions<AppSettings> appSettings, 
+    ILogger<NewSymbolTickerDataHandler> logger)
+    : INotificationHandler<PriceChangeNotification>
 {
-    public async Task Handle(NewSymbolTickerDataEvent notification, CancellationToken cancellationToken)
+    public async Task Handle(PriceChangeNotification notification, CancellationToken cancellationToken)
     {
         try
         {
             var analyseWorker = ActivatorUtilities.GetServiceOrCreateInstance<AnalyseWorkerProcess>(serviceProvider) ?? throw new PlatformNotSupportedException("can not instanciate analyse worker");
-            await analyseWorker.AnalyseMarket(notification, appSettings.Value);
+            await analyseWorker.AnalysePrice(notification, appSettings.Value);
         }
         catch (Exception ex)
         {

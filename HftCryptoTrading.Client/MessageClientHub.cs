@@ -52,7 +52,7 @@ public class MessageClientHub<T> : IMessageClientHub<T> where T : class
         await _receiver.StartAsync();
         await _connection.StartAsync();
 
-        await _publisher.StartAsync(@namespace, _eventName);
+        await _publisher.StartAsync(@namespace);
         Console.WriteLine("MessageClientHub connected to the hub.");
     }
 
@@ -66,6 +66,6 @@ public class MessageClientHub<T> : IMessageClientHub<T> where T : class
 
     public async Task<OperationResult> BroadcastEvent(Guid id, string @namespace, T message)
     {
-        return await _publisher.BroadcastEvent(id, @namespace, _eventName, message);
+        return await _publisher.BroadcastEvent<T>(id, @namespace, message);
     }
 }

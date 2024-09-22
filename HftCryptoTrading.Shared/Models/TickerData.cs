@@ -16,4 +16,6 @@ public record class TickerData(string symbol)
     public decimal? LowPrice { get; set; }
     public decimal? PriceChange { get; set; }
     public decimal? PriceChangePercent { get; set; }
+    public decimal? Bid { get; set; } // Add Bid
+    public decimal? Ask { get; set; } // Add Ask
 }

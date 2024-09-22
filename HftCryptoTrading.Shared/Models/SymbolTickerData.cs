@@ -14,4 +14,5 @@ public class SymbolTickerData(string exchange)
     public DateTime PublishedDate { get; set; }
     public decimal PriceChangePercent { get; set; }
     public decimal Volume { get; set; }
+    public BookPriceData? BookPrice { get; set; }
 }

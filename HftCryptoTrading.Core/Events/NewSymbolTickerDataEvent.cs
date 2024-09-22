@@ -8,7 +8,8 @@ using System.Threading.Tasks;
 
 namespace HftCryptoTrading.Exchanges.Core.Events;
 
-public class NewSymbolTickerDataEvent(IEnumerable<SymbolTickerData> data):INotification
+public class NewSymbolTickerDataEvent(string exchangeName, IEnumerable<SymbolTickerData> data):INotification
 {
+    public string ExchangeName => exchangeName;
     public IEnumerable<SymbolTickerData> Data => data;
 }

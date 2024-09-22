@@ -114,7 +114,7 @@ public class DownloadWorkerProcess
             {
                 await _retryPolicy.ExecuteAsync(async () =>
                 {
-                    await _saga.PublishSymbols(data);
+                    await _saga.PublishSymbols(_exchange.ExchangeName, data);
                     success = true;
                 });
 

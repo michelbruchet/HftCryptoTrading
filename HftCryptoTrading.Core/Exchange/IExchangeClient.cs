@@ -1,4 +1,5 @@
-﻿using HftCryptoTrading.Shared.Models;
+﻿using HftCryptoTrading.Exchanges.Core.Events;
+using HftCryptoTrading.Shared.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,12 +11,12 @@ namespace HftCryptoTrading.Exchanges.Core.Exchange;
 public interface IExchangeClient : IDisposable, IAsyncDisposable
 {
     /// <summary>
-    /// Specify the Exchange Name
+    /// Specify the ExchangeName Name
     /// </summary>
     string ExchangeName { get; }
 
     /// <summary>
-    /// Retrieve the list of symbols or products on the Exchange
+    /// Retrieve the list of symbols or products on the ExchangeName
     /// </summary>
     /// <returns></returns>
     Task<List<SymbolData>> GetSymbolsAsync();
@@ -34,5 +35,6 @@ public interface IExchangeClient : IDisposable, IAsyncDisposable
     /// <param name="endTime"></param>
     /// <returns></returns>
     Task<List<KlineData>> GetHistoricalKlinesAsync(string symbol, TimeSpan period, DateTime startTime, DateTime endTime);
-
+    Task<List<BookPriceData>> GetBookPricesAsync(IEnumerable<string> symboles);
+    Task RegisterPriceChangeHandlerAsync(AnalyseMarketDoneSuccessFullyEvent notification);
 }

@@ -5,6 +5,7 @@ using HftCryptoTrading.Saga.MarketDownloader.Processes;
 using HftCryptoTrading.Saga.MarketDownloader.Workers;
 using HftCryptoTrading.ServiceDefaults;
 using HftCryptoTrading.Shared;
+using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 
 AppDomain.CurrentDomain.UnhandledException += (object sender, UnhandledExceptionEventArgs e) =>
@@ -38,15 +39,16 @@ builder.Services.Configure<AppSettings>(builder.Configuration);
 builder.Services.AddSingleton<ExchangeProviderFactory>(sp =>
 {
     var loggerFactory = sp.GetRequiredService<ILoggerFactory>();
+    var mediatR = sp.GetRequiredService<IMediator>();
 
     ExchangeProviderFactory.RegisterExchange("Binance", loggerFactory, (appSettings, loggerFactory) => new BinanceDownloadMarketClient(appSettings,
-        loggerFactory.CreateLogger<BinanceDownloadMarketClient>()));
+        loggerFactory.CreateLogger<BinanceDownloadMarketClient>(), mediatR));
 
     return new ExchangeProviderFactory(loggerFactory);
 });
 
 builder.Services.AddSingleton<MarketDownloaderSagaHost>();
-builder.Services.AddSingleton<MarketDownloaderSaga>();
+builder.Services.AddSingleton<IMarketDownloaderSaga, MarketDownloaderSaga>();
 builder.Services.AddHostedService<MarketDownloaderSagaHost>();
 
 builder.Services.AddMediatR(option=>
