@@ -1,0 +1,1 @@
+﻿global using HftCryptoTrading.Shared.Strategies;

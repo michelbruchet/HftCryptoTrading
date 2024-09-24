@@ -1,0 +1,6 @@
+@HftCryptoTrading.Saga.StrategyEvaluator_HostAddress = http://localhost:5220
+
+GET {{HftCryptoTrading.Saga.StrategyEvaluator_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

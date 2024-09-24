@@ -13,9 +13,16 @@ public class HubSetting
     public string NameSpace { get; set; }
 }
 
+public class RuntimeSetting
+{
+    public string IndicatorsPath { get; set; } = "wwwroot/indicators";
+    public string StrategiesPath { get; set; } = "wwwroot/strategies";
+}
+
 public class AppSettings
 {
     public int LimitSymbolsMarket { get; set; }
     public BinanceSetting Binance { get; set; }
     public HubSetting Hub { get; set; }
+    public RuntimeSetting Runtime { get; set; }
 }

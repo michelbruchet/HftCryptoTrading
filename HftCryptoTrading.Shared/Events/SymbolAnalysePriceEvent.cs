@@ -1,4 +1,5 @@
-﻿using MessagePack;
+﻿using MediatR;
+using MessagePack;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,7 +9,7 @@ using System.Threading.Tasks;
 namespace HftCryptoTrading.Shared.Events;
 
 [MessagePackObject]
-public class SymbolAnalysePriceEvent(string exchangeName, string symbolName)
+public class SymbolAnalysePriceEvent(string exchangeName, string symbolName) : INotification
 {
     [Key(0)]
     public string ExchangeName { get; } = exchangeName;

@@ -13,4 +13,6 @@ builder.AddProject<Projects.HftCryptoTrading_Saga_MarketDownloader>("hftcryptotr
     .WithReference(cache)
     .WithReference(hubApi);
 
+builder.AddProject<Projects.HftCryptoTrading_Saga_StrategyEvaluator>("hftcryptotrading-saga-strategyevaluator");
+
 builder.Build().Run();
