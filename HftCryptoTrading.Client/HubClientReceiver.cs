@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace HftCryptoTrading.Client;
 
-internal class HubClientReceiver<T> : IClientMessageHub
+public class HubClientReceiver<T> : IClientMessageHub
     where T : class
 {
     public event EventHandler<T> ClientMessageReceived;
@@ -39,6 +39,25 @@ internal class HubClientReceiver<T> : IClientMessageHub
         _groupName = $"{_namespace}.{_eventName}";
     }
 
+    public HubClientReceiver(AppSettings appSetting, string? eventName = null):
+        this(new HubConnectionBuilder()
+        .WithUrl($"{appSetting.Hub.HubApiUrl.TrimEnd('/')}/messages", options =>
+        {
+            options.Headers.Add("x-Api-Key", appSetting.Hub.HubApiKey);
+            options.Headers.Add("x-Api-Secret", appSetting.Hub.HubApiSecret);
+        })
+        .WithAutomaticReconnect(new[]
+        {
+            TimeSpan.FromSeconds(0),
+            TimeSpan.FromSeconds(2),
+            TimeSpan.FromSeconds(10),
+            TimeSpan.FromSeconds(30)
+        })
+        .Build(), appSetting.Hub.NameSpace, eventName ?? typeof(T).Name)
+    {
+
+    }
+
     public async Task StartAsync()
     {
         // Set up the ReceiveMessage handler
@@ -59,6 +78,9 @@ internal class HubClientReceiver<T> : IClientMessageHub
                 if (groupName.Equals(_groupName, StringComparison.OrdinalIgnoreCase))
                     await ReceiveMessageDelayed(groupName, id);
             });
+
+        await _connection.StartAsync();
+        await _connection.InvokeAsync("Subscribe", _namespace, _eventName);
 
         Console.WriteLine("Receiver connected to the hub.");
     }

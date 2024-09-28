@@ -14,9 +14,9 @@ public class HubClientPublisher : IMessageHub
 {
     private readonly HubConnection _connection;
     private string _namespace;
-    private string _eventName;
+    private string? _eventName;
 
-    public HubClientPublisher(HubConnection connection, string @namespace, string eventName)
+    public HubClientPublisher(HubConnection connection, string @namespace, string? eventName = null)
     {
         _connection = connection;
         _namespace = @namespace;
@@ -30,7 +30,7 @@ public class HubClientPublisher : IMessageHub
     {
     }
 
-    public HubClientPublisher(AppSettings appSetting, string eventName):
+    public HubClientPublisher(AppSettings appSetting, string? eventName = null):
         this(new HubConnectionBuilder()
         .WithUrl($"{appSetting.Hub.HubApiUrl.TrimEnd('/')}/messages", options =>
         {
@@ -47,6 +47,10 @@ public class HubClientPublisher : IMessageHub
         .Build(), appSetting.Hub.NameSpace, eventName)
     {
     }
+
+    public HubClientPublisher(AppSettings appSetting) :
+    this(appSetting, null)
+    { }
 
     public async Task StartAsync(string @namespace)
     {

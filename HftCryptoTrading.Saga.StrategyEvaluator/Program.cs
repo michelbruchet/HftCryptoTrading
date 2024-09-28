@@ -1,10 +1,13 @@
 using HftCryptoTrading.Exchanges.BinanceExchange;
 using HftCryptoTrading.Exchanges.Core.Exchange;
 using HftCryptoTrading.Saga.StrategyEvaluator.Handlers;
+using HftCryptoTrading.Saga.StrategyEvaluator.Indicators;
+using HftCryptoTrading.Saga.StrategyEvaluator.Workers;
 using HftCryptoTrading.ServiceDefaults;
 using HftCryptoTrading.Shared;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
+using StrategyExecution;
 
 AppDomain.CurrentDomain.UnhandledException += (object sender, UnhandledExceptionEventArgs e) =>
 {
@@ -47,10 +50,22 @@ builder.Services.AddSingleton<ExchangeProviderFactory>(sp =>
 
 builder.Services.AddMediatR(option =>
 {
-    option.RegisterServicesFromAssembly(typeof(NewPriceDetectedHandler).Assembly);
+    option.RegisterServicesFromAssembly(typeof(ReceiveSymbolAnaylsePriceHandler).Assembly);
 });
 
-builder.Services.AddSingleton<StrategyLoaderService>();
+builder.Services.AddActivatedSingleton(sp =>
+{
+    StrategyLoaderService.Initialize(sp);
+    return StrategyLoaderService.Service;
+});
+
+builder.Services.AddActivatedSingleton(sp =>
+{
+    IndicatorLoaderService.Initialize(sp);
+    return IndicatorLoaderService.Service;
+});
+
+builder.Services.AddSingleton<IStrategyAnalyserSaga, StrategyAnalyserSaga>();
 
 builder.AddRedisDistributedCache("cache", configureOptions: options => options.ConnectTimeout = 3000);
 
@@ -67,6 +82,8 @@ builder.Services.AddSingleton<ExchangeProviderFactory>(sp =>
 
     return new ExchangeProviderFactory(loggerFactory);
 });
+
+builder.Services.AddHostedService<StrategyAnalyserSagaHost>();
 
 var app = builder.Build();
 

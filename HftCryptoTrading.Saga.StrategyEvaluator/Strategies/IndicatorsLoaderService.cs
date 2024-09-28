@@ -6,22 +6,37 @@ using System.Collections.Concurrent;
 using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
+using HftCryptoTrading.Shared.Metrics;
+using StrategyExecution;
 
 namespace HftCryptoTrading.Saga.StrategyEvaluator.Indicators;
 
 public class IndicatorLoaderService
 {
     private string _indicatorsPath;
-    private ConcurrentDictionary<string, IIndicator> _indicators;
-    private static Lazy<IndicatorLoaderService> _indicatorLoaderService =
-        new Lazy<IndicatorLoaderService>(new IndicatorLoaderService());
 
-    private IndicatorLoaderService()
+    private static ConcurrentDictionary<string, IIndicator> _indicators;
+    private static Lazy<IndicatorLoaderService> _indicatorLoaderService;
+    private static IMetricService _metricService; // Ajout du service de métrique
+
+    public static void Initialize(IServiceProvider serviceProvider)
     {
-        _indicators = new ConcurrentDictionary<string, IIndicator>(); // Update to store IIndicator
+        _indicators = new ConcurrentDictionary<string, IIndicator>();
+        _metricService = serviceProvider.CreateScope().ServiceProvider.GetRequiredService<IMetricService>();
     }
 
-    public static IndicatorLoaderService Service => _indicatorLoaderService.Value;
+    public static IndicatorLoaderService Service
+    {
+        get
+        {
+            if (_indicatorLoaderService == null)
+            {
+                _indicatorLoaderService = new Lazy<IndicatorLoaderService>();
+            }
+
+            return _indicatorLoaderService.Value;
+        }
+    }
 
     public void LoadIndicators(string indicatorsPath)
     {
@@ -34,7 +49,8 @@ public class IndicatorLoaderService
     {
         if (!Directory.Exists(_indicatorsPath))
         {
-            throw new DirectoryNotFoundException($"The specified indicators directory does not exist: {_indicatorsPath}");
+            _metricService.TrackFailure($"The specified indicators directory does not exist: {_indicatorsPath}");
+            return;
         }
 
         var indicatorFiles = Directory.GetFiles(_indicatorsPath, "*.cs");
@@ -48,33 +64,29 @@ public class IndicatorLoaderService
     // Compile and add indicator from file
     private void CompileIndicator(string filePath)
     {
+        using var tracking = _metricService.StartTracking("CompileIndicator");
         var code = File.ReadAllText(filePath);
-
         var usingDirectives = @"
-        //added automatically by the generator
-        using System;
-        using Skender.Stock.Indicators;
-        using System.Collections.Generic;
-        using System.Linq;
-        using HftCryptoTrading.Shared.Strategies;
-        //end added automatically by the generator
-        ";
+            //added automatically by the generator
+            using System;
+            using Skender.Stock.Indicators;
+            using System.Collections.Generic;
+            using System.Linq;
+            using HftCryptoTrading.Shared.Strategies;
+            //end added automatically by the generator
+            ";
 
         var @namespace = new StringBuilder("HftCryptoTrading.CustomIndicators");
         @namespace.Append(Path.GetDirectoryName(filePath).Replace(Path.DirectorySeparatorChar, '.'));
 
         var fullcode = new StringBuilder();
-
         fullcode.AppendLine(usingDirectives);
         fullcode.AppendLine();
         fullcode.AppendLine($"namespace {@namespace.ToString()};");
         fullcode.AppendLine();
-
         fullcode.AppendLine(code);
 
         var syntaxTree = CSharpSyntaxTree.ParseText(fullcode.ToString());
-
-        // Utiliser une expression régulière pour extraire le nom de la classe
         var classNameMatch = Regex.Match(code, @"class\s+(\w+)");
         string indicatorName;
 
@@ -88,7 +100,6 @@ public class IndicatorLoaderService
         }
 
         var references = GetReferences();
-
         var compilation = CSharpCompilation.Create(
             Path.GetFileNameWithoutExtension(filePath),
             new[] { syntaxTree },
@@ -105,7 +116,10 @@ public class IndicatorLoaderService
                 {
                     if (diagnostic.Severity == DiagnosticSeverity.Error)
                     {
-                        throw new InvalidOperationException($"Error compiling {filePath}: {diagnostic.GetMessage()}");
+                        // Track compilation failure
+                        _metricService.TrackFailure("CompileIndicator",
+                            new InvalidOperationException($"Message compiling {filePath}: {diagnostic.GetMessage()}"));
+                        throw new InvalidOperationException($"Message compiling {filePath}: {diagnostic.GetMessage()}");
                     }
                 }
             }
@@ -121,10 +135,11 @@ public class IndicatorLoaderService
 
             // Create an instance of the indicator (no parameters in the constructor)
             var indicatorInstance = (IIndicator)Activator.CreateInstance(type);
-
-            // Store the indicator in the dictionary
             _indicators[indicatorName] = indicatorInstance;
         }
+
+        // Track success if compilation is successful
+        _metricService.TrackSuccess("CompileIndicator");
     }
 
     // Get necessary references
@@ -135,7 +150,6 @@ public class IndicatorLoaderService
 
         foreach (var assembly in assemblies)
         {
-            // Vérifie si l'assembly a un chemin valide et n'est pas dynamique
             if (!string.IsNullOrEmpty(assembly.Location) && !assembly.IsDynamic)
             {
                 references.Add(MetadataReference.CreateFromFile(assembly.Location));
@@ -148,14 +162,19 @@ public class IndicatorLoaderService
     // Execute a indicator
     public IEnumerable<decimal> ExecuteIndicator(string indicatorName, IEnumerable<Quote> quotes, params object[] parameters)
     {
-        if (_indicators.TryGetValue(indicatorName, out var indicator))
+        using (var tracking = _metricService.StartTracking("ExecuteIndicator"))
         {
-            return indicator.Execute(quotes, parameters); // Call the Execute method on IIndicator
+            if (_indicators.TryGetValue(indicatorName, out var indicator))
+            {
+                var result = indicator.Execute(quotes, parameters); // Call the Execute method on IIndicator
+                // Track success
+                _metricService.TrackSuccess("ExecuteIndicator");
+                return result;
+            }
+
+            throw new KeyNotFoundException($"Indicator '{indicatorName}' not found.");
         }
-
-        throw new KeyNotFoundException($"Indicator '{indicatorName}' not found.");
     }
-
 
     // Add a new indicator
     public void AddIndicator(string filePath)
@@ -173,11 +192,8 @@ public class IndicatorLoaderService
     // Update an existing indicator
     public void UpdateIndicator(string filePath)
     {
-        // Remove the indicator first
         var indicatorName = Path.GetFileNameWithoutExtension(filePath);
         RemoveIndicator(indicatorName);
-
-        // Compile and add the updated indicator
         CompileIndicator(filePath);
     }
 

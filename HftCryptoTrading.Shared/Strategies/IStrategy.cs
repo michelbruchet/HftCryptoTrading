@@ -18,8 +18,8 @@ public enum ActionStrategy
 }
 public interface IStrategy
 {
-    ActionStrategy Execute();
-    string Error { get; }
+    ActionStrategy Execute(IEnumerable<Quote> quotes, params object[] parameters);
+    string Message { get; }
     string StrategyName { get; }
     string Description { get; }
     StrategyType StrategyType { get; }

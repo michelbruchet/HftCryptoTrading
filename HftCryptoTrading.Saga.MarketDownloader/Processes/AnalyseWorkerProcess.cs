@@ -193,9 +193,10 @@ public class AnalyseWorkerProcess
         using (_metricService.StartTracking("IsAbnormalSpread"))
         {
             if (symbol == null) throw new ArgumentNullException(nameof(symbol), "Symbol cannot be null.");
+            
             if (symbol.BookPrice.BestBidPrice <= 0 || symbol.BookPrice.BestAskPrice <= 0)
             {
-                throw new ArgumentException("Bid and Ask prices must be greater than zero.", nameof(symbol));
+                return true;
             }
 
             decimal spread = symbol.BookPrice.BestAskPrice - symbol.BookPrice.BestBidPrice;

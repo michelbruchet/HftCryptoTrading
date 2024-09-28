@@ -9,17 +9,6 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-	  <Compile Remove="Templates\MyTradingStrategy.cs" />
-	</ItemGroup>
-
-	<ItemGroup>
-	  <Content Include="Templates\MyTradingStrategy.cs">
-	    <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-	    <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-	  </Content>
-	</ItemGroup>
-
-	<ItemGroup>
 		<PackageReference Include="Aspire.StackExchange.Redis.DistributedCaching" Version="8.2.0" />
 		<PackageReference Include="MediatR" Version="12.4.1" />
 		<PackageReference Include="MessagePack" Version="2.5.172" />
@@ -42,7 +31,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <Compile Update="Strategies\MySampleStrategy.cs">
+	  <Compile Update="Templates\MyTradingStrategy.cs">
 	    <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
 	    <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
 	  </Compile>

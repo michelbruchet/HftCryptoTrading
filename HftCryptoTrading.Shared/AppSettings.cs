@@ -19,10 +19,17 @@ public class RuntimeSetting
     public string StrategiesPath { get; set; } = "wwwroot/strategies";
 }
 
+public class Trading
+{
+    public TimeSpan Period { get; set; } = TimeSpan.FromHours(1);
+    public int StartElpasedTime { get; set; } = 60 * 500;
+}
+
 public class AppSettings
 {
     public int LimitSymbolsMarket { get; set; }
     public BinanceSetting Binance { get; set; }
     public HubSetting Hub { get; set; }
     public RuntimeSetting Runtime { get; set; }
+    public Trading Trading { get; set; }
 }
