@@ -1,12 +1,12 @@
 using HftCryptoTrading.Exchanges.BinanceExchange;
 using HftCryptoTrading.Exchanges.Core.Exchange;
-using HftCryptoTrading.Saga.MarketDownloader.Handlers;
-using HftCryptoTrading.Saga.MarketDownloader.Processes;
-using HftCryptoTrading.Saga.MarketDownloader.Workers;
+using HftCryptoTrading.Saga.MarketWatcher.Handlers;
+using HftCryptoTrading.Saga.MarketWatcher.Workers;
 using HftCryptoTrading.ServiceDefaults;
-using HftCryptoTrading.Shared;
+using HftCryptoTrading.Services.Commands;
+using HftCryptoTrading.Shared.Saga;
 using MediatR;
-using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Caching.Distributed;
 
 AppDomain.CurrentDomain.UnhandledException += (object sender, UnhandledExceptionEventArgs e) =>
 {
@@ -40,20 +40,23 @@ builder.Services.AddSingleton<ExchangeProviderFactory>(sp =>
 {
     var loggerFactory = sp.GetRequiredService<ILoggerFactory>();
     var mediatR = sp.GetRequiredService<IMediator>();
+    var distributedCache = sp.GetRequiredService<IDistributedCache>();
 
-    ExchangeProviderFactory.RegisterExchange("Binance", loggerFactory, (appSettings, loggerFactory) => new BinanceDownloadMarketClient(appSettings,
-        loggerFactory.CreateLogger<BinanceDownloadMarketClient>(), mediatR));
+    ExchangeProviderFactory.RegisterExchange("Binance", loggerFactory, (appSettings, loggerFactory) => 
+    new BinanceDownloadMarketClient(appSettings,
+        loggerFactory.CreateLogger<BinanceDownloadMarketClient>(), mediatR, distributedCache));
 
     return new ExchangeProviderFactory(loggerFactory);
 });
 
-builder.Services.AddSingleton<MarketDownloaderSagaHost>();
-builder.Services.AddSingleton<IMarketDownloaderSaga, MarketDownloaderSaga>();
-builder.Services.AddHostedService<MarketDownloaderSagaHost>();
+builder.Services.AddSingleton<MarketWatcherSagaHost>();
+builder.Services.AddSingleton<IMarketWatcherSaga, MarketWatcherSaga>();
+builder.Services.AddHostedService<MarketWatcherSagaHost>();
+builder.Services.AddSingleton<ISymbolAnalysisHelper, SymbolAnalysisHelper>();
 
 builder.Services.AddMediatR(option=>
     {
-        option.RegisterServicesFromAssembly(typeof(NewSymbolTickerDataHandler).Assembly);
+        option.RegisterServicesFromAssembly(typeof(PublishedSymbolsDownloadedHandler).Assembly);
     });
 
 builder.AddRedisDistributedCache("cache", configureOptions: options => options.ConnectTimeout = 3000);

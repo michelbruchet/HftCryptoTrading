@@ -1,18 +1,11 @@
-﻿using MessagePack;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace HftCryptoTrading.Shared.Models;
+﻿namespace HftCryptoTrading.Shared.Models;
 
 using MessagePack;
 
 [MessagePackObject]
 public class SymbolData()
 {
-    [Key(0)] public string Symbol { get; set; }
+    [Key(0)] public string Name { get; set; }
     [Key(1)] public bool AllowTrailingStop { get; set; }
     [Key(2)] public string BaseAsset { get; set; }
     [Key(3)] public int BaseAssetPrecision { get; set; }
@@ -31,19 +24,19 @@ public class SymbolData()
     [Key(16)] public string Status { get; set; }
 
     // Optional filters
-    [Key(17)] public MarketLotSizeFilterData? MarketLotSizeFilter { get; set; }
-    [Key(18)] public IceBergPartsFilterData? IceBergPartsFilter { get; set; }
-    [Key(19)] public MaxAlgorithmicOrdersFilterData? MaxAlgorithmicOrdersFilter { get; set; }
-    [Key(20)] public MaxOrdersFilterData? MaxOrdersFilter { get; set; }
-    [Key(21)] public MaxPositionFilterData? MaxPositionFilter { get; set; }
-    [Key(22)] public MinNotionalFilterData? MinNotionalFilter { get; set; }
-    [Key(23)] public PriceFilterData? PriceFilter { get; set; }
-    [Key(24)] public PricePercentFilterData? PricePercentFilter { get; set; }
-    [Key(25)] public TrailingDeltaFilterData? TrailingDeltaFilter { get; set; }
+    [Key(17)] public MarketLotSizeFilterData? MarketLotSizeFilter { get; set; } = new();
+    [Key(18)] public IceBergPartsFilterData? IceBergPartsFilter { get; set; } = new();
+    [Key(19)] public MaxAlgorithmicOrdersFilterData? MaxAlgorithmicOrdersFilter { get; set; } = new();
+    [Key(20)] public MaxOrdersFilterData? MaxOrdersFilter { get; set; } = new();
+    [Key(21)] public MaxPositionFilterData? MaxPositionFilter { get; set; } = new();
+    [Key(22)] public MinNotionalFilterData? MinNotionalFilter { get; set; } = new();
+    [Key(23)] public PriceFilterData? PriceFilter { get; set; } = new();
+    [Key(24)] public PricePercentFilterData? PricePercentFilter { get; set; } = new();
+    [Key(25)] public TrailingDeltaFilterData? TrailingDeltaFilter { get; set; } = new();
 
     public SymbolData(string symbol):this()
     {
-        Symbol = symbol;
+        Name = symbol;
     }
 }
 

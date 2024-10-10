@@ -1,15 +1,9 @@
-﻿using HftCryptoTrading.Shared;
-using HftCryptoTrading.Shared.Metrics;
-using HftCryptoTrading.Shared.Models;
-using Microsoft.Extensions.Caching.Distributed;
-using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
-using Polly;
+﻿using Microsoft.Extensions.Logging;
 using System.Collections.Concurrent;
 
 namespace HftCryptoTrading.Exchanges.Core.Exchange;
 
-public class ExchangeProviderFactory(ILoggerFactory loggerFactory)
+public class ExchangeProviderFactory(ILoggerFactory loggerFactory) : IExchangeProviderFactory
 {
     private static ConcurrentDictionary<string, Func<AppSettings, ILoggerFactory, IExchangeClient>> _clients = new();
 

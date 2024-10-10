@@ -1,8 +1,5 @@
-using System;
 using Aspire.Hosting.Testing;
 using HftCryptoTrading.Client;
-using Microsoft.VisualStudio.TestPlatform.CommunicationUtilities;
-using Reqnroll;
 
 namespace HftCryptoTrading.ApiServices.E2ETests.StepDefinitions;
 

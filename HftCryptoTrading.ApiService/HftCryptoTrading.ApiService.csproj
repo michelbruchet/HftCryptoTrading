@@ -19,6 +19,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\HftCryptoTrading.ServiceDefaults\HftCryptoTrading.ServiceDefaults.csproj" />
+    <ProjectReference Include="..\HftCryptoTrading.Services\HftCryptoTrading.Services.csproj" />
     <ProjectReference Include="..\HftCryptoTrading.Shared\HftCryptoTrading.Shared.csproj" />
   </ItemGroup>
 

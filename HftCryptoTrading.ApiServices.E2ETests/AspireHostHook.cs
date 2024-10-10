@@ -1,6 +1,5 @@
 using Aspire.Hosting.Testing;
 using Microsoft.Extensions.DependencyInjection;
-using Reqnroll;
 
 namespace HftCryptoTrading.ApiServices.E2ETests
 {

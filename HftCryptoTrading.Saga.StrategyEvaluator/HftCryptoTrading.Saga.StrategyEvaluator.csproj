@@ -9,7 +9,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Aspire.StackExchange.Redis.DistributedCaching" Version="8.2.0" />
+		<PackageReference Include="Aspire.StackExchange.Redis.DistributedCaching" Version="8.2.1" />
 		<PackageReference Include="MediatR" Version="12.4.1" />
 		<PackageReference Include="MessagePack" Version="2.5.172" />
 		<PackageReference Include="MessagePack.ReactiveProperty" Version="2.5.172" />
@@ -27,6 +27,7 @@
 		<ProjectReference Include="..\HftCryptoTrading.Core\HftCryptoTrading.Exchanges.Core.csproj" />
 		<ProjectReference Include="..\HftCryptoTrading.Exchanges.BinanceExchange\HftCryptoTrading.Exchanges.BinanceExchange.csproj" />
 		<ProjectReference Include="..\HftCryptoTrading.ServiceDefaults\HftCryptoTrading.ServiceDefaults.csproj" />
+		<ProjectReference Include="..\HftCryptoTrading.Services\HftCryptoTrading.Services.csproj" />
 		<ProjectReference Include="..\HftCryptoTrading.Shared\HftCryptoTrading.Shared.csproj" />
 	</ItemGroup>
 

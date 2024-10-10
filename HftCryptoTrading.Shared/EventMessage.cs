@@ -1,5 +1,4 @@
 ﻿using MessagePack;
-using System.ComponentModel.DataAnnotations;
 using KeyAttribute = MessagePack.KeyAttribute;
 public static class EventMessageExts
 {

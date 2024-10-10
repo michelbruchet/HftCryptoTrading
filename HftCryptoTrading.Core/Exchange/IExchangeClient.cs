@@ -1,10 +1,5 @@
-﻿using HftCryptoTrading.Exchanges.Core.Events;
+﻿using HftCryptoTrading.Shared.Events;
 using HftCryptoTrading.Shared.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace HftCryptoTrading.Exchanges.Core.Exchange;
 
@@ -14,6 +9,10 @@ public interface IExchangeClient : IDisposable, IAsyncDisposable
     /// Specify the ExchangeName Name
     /// </summary>
     string ExchangeName { get; }
+
+    event EventHandler<OrderUpdateEvent> OnOrderUpdated;
+    event EventHandler<AccountPositionUpdateEvent> OnAccountPositionUpdated;
+    event EventHandler<AccountBalanceUpdateEvent> OnAccountBalanceUpdated;
 
     /// <summary>
     /// Retrieve the list of symbols or products on the ExchangeName
@@ -36,5 +35,10 @@ public interface IExchangeClient : IDisposable, IAsyncDisposable
     /// <returns></returns>
     Task<List<KlineData>> GetHistoricalKlinesAsync(string symbol, TimeSpan period, DateTime startTime, DateTime endTime);
     Task<List<BookPriceData>> GetBookPricesAsync(IEnumerable<string> symboles);
-    Task RegisterPriceChangeHandlerAsync(AnalyseMarketDoneSuccessFullyEvent notification);
+    Task RegisterPriceChangeHandlerAsync(PublishSymbolAnalysedSuccessFullyEvent notification);
+    Task<List<OpenOrder>> GetOpenedOrders();
+    Task<PlaceOrderResult> PlaceMarketOrder(PlaceOrder placeOrder);
+    Task TrackPlaceOrder();
+    Task<IEnumerable<AccountPosition>> GetCurrentPositions();
+    Task<List<AccountBalance>> GetCurrentAccountBalancesGroupedByBaseAsset();
 }

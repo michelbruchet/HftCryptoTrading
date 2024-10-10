@@ -1,23 +1,16 @@
-﻿using MessagePack;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace HftCryptoTrading.Exchanges.Core;
+﻿namespace HftCryptoTrading.Exchanges.Core;
 
 using MessagePack;
 using System;
 
 [MessagePackObject]
-public class Symbol
+public class SymbolPrice
 {
     [Key(0)]
     public int Id { get; set; } // Primary Key
 
     [Key(1)]
-    public string SymbolIdentifier { get; set; } // Symbol identifier (e.g., BTCUSDT)
+    public string SymbolIdentifier { get; set; } // SymbolPrice identifier (e.g., BTCUSDT)
 
     [Key(2)]
     public decimal LastPrice { get; set; } // Latest price of the symbol
@@ -51,7 +44,7 @@ public class Kline
     public int SymbolId { get; set; } // Foreign Key to Symbols table
 
     [Key(2)]
-    public Symbol Symbol { get; set; } // Navigation property
+    public SymbolPrice Symbol { get; set; } // Navigation property
 
     [Key(3)]
     public decimal OpenPrice { get; set; } // Opening price
@@ -82,7 +75,7 @@ public class VolumeAnomaly
     public int SymbolId { get; set; } // Foreign Key to Symbols table
 
     [Key(2)]
-    public Symbol Symbol { get; set; } // Navigation property
+    public SymbolPrice Symbol { get; set; } // Navigation property
 
     [Key(3)]
     public string AnomalyType { get; set; } // Type of volume anomaly detected
@@ -101,7 +94,7 @@ public class PriceAnomaly
     public int SymbolId { get; set; } // Foreign Key to Symbols table
 
     [Key(2)]
-    public Symbol Symbol { get; set; } // Navigation property
+    public SymbolPrice Symbol { get; set; } // Navigation property
 
     [Key(3)]
     public string AnomalyType { get; set; } // Type of price anomaly detected
@@ -120,7 +113,7 @@ public class SpreadAnomaly
     public int SymbolId { get; set; } // Foreign Key to Symbols table
 
     [Key(2)]
-    public Symbol Symbol { get; set; } // Navigation property
+    public SymbolPrice Symbol { get; set; } // Navigation property
 
     [Key(3)]
     public string AnomalyType { get; set; } // Type of spread anomaly detected
@@ -139,7 +132,7 @@ public class PriceChange
     public int SymbolId { get; set; } // Foreign Key to Symbols table
 
     [Key(2)]
-    public Symbol Symbol { get; set; } // Navigation property
+    public SymbolPrice Symbol { get; set; } // Navigation property
 
     [Key(3)]
     public decimal OldPrice { get; set; } // Price before the change

@@ -1,21 +1,34 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿namespace HftCryptoTrading.Shared.Models;
 
-namespace HftCryptoTrading.Shared.Models;
-
-public record class TickerData(string symbol)
+public record class TickerData(string symbol, string exchange)
 {
-    public string Symbol { get; set; } = symbol;// The trading pair, e.g., BTC/USDT
-    public decimal? Price { get; set; }
-    public decimal? Volume { get; set; }
-    public decimal? Price24H { get; set; }
+    public string Symbol => symbol;
+    public string Exchange => exchange;
+
+    /// <summary>
+    /// Last trade price
+    /// </summary>
+    public decimal? LastPrice { get; set; }
+
+    /// <summary>
+    /// Highest price in last 24h
+    /// </summary>
     public decimal? HighPrice { get; set; }
+
+    /// <summary>
+    /// Lowest price in last 24h
+    /// </summary>
     public decimal? LowPrice { get; set; }
-    public decimal? PriceChange { get; set; }
-    public decimal? PriceChangePercent { get; set; }
-    public decimal? Bid { get; set; } // Add Bid
-    public decimal? Ask { get; set; } // Add Ask
+
+    /// <summary>
+    /// Trade volume in base asset in the last 24h
+    /// </summary>
+    public decimal Volume { get; set; }
+
+    /// <summary>
+    /// Change percentage in the last 24h
+    /// </summary>
+    public decimal? ChangePercentage { get; set; }
+    public decimal Bid { get; set; }
+    public decimal Ask { get; set; }
 }

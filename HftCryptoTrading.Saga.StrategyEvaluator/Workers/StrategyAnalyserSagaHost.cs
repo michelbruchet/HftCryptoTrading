@@ -1,4 +1,6 @@
-﻿namespace HftCryptoTrading.Saga.StrategyEvaluator.Workers;
+﻿using HftCryptoTrading.Shared.Saga;
+
+namespace HftCryptoTrading.Saga.StrategyEvaluator.Workers;
 
 public class StrategyAnalyserSagaHost(IStrategyAnalyserSaga saga) : BackgroundService
 {

@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace HftCryptoTrading.Shared.Models;
+﻿namespace HftCryptoTrading.Shared.Models;
 
 public record class BookPriceData
 {

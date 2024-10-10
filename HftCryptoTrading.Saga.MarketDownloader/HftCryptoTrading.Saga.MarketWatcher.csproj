@@ -1,0 +1,32 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UserSecretsId>80679461-314b-4535-a2eb-7f632ee69690</UserSecretsId>
+    <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+  </PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Aspire.StackExchange.Redis.DistributedCaching" Version="8.2.1" />
+		<PackageReference Include="MediatR" Version="12.4.1" />
+		<PackageReference Include="MessagePack" Version="2.5.172" />
+		<PackageReference Include="MessagePack.ReactiveProperty" Version="2.5.172" />
+		<PackageReference Include="MessagePackAnalyzer" Version="2.5.172">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+		<PackageReference Include="Microsoft.Extensions.Logging" Version="8.0.0" />
+	</ItemGroup>
+
+	<ItemGroup>
+    <ProjectReference Include="..\HftCryptoTrading.Client\HftCryptoTrading.Client.csproj" />
+    <ProjectReference Include="..\HftCryptoTrading.Core\HftCryptoTrading.Exchanges.Core.csproj" />
+    <ProjectReference Include="..\HftCryptoTrading.Exchanges.BinanceExchange\HftCryptoTrading.Exchanges.BinanceExchange.csproj" />
+    <ProjectReference Include="..\HftCryptoTrading.ServiceDefaults\HftCryptoTrading.ServiceDefaults.csproj" />
+    <ProjectReference Include="..\HftCryptoTrading.Services\HftCryptoTrading.Services.csproj" />
+    <ProjectReference Include="..\HftCryptoTrading.Shared\HftCryptoTrading.Shared.csproj" />
+  </ItemGroup>
+
+</Project>

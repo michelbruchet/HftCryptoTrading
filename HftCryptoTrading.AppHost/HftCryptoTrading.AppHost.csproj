@@ -10,15 +10,16 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\HftCryptoTrading.ApiService\HftCryptoTrading.ApiService.csproj" />
-    <ProjectReference Include="..\HftCryptoTrading.Saga.MarketDownloader\HftCryptoTrading.Saga.MarketDownloader.csproj" />
-    <ProjectReference Include="..\HftCryptoTrading.Saga.StrategyEvaluator\HftCryptoTrading.Saga.StrategyEvaluator.csproj" />
-    <ProjectReference Include="..\HftCryptoTrading.Web\HftCryptoTrading.Web.csproj" />
+    <PackageReference Include="Aspire.Hosting.AppHost" Version="8.2.1" />
+    <PackageReference Include="Aspire.Hosting.Redis" Version="8.2.1" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Aspire.Hosting.AppHost" Version="8.2.0" />
-    <PackageReference Include="Aspire.Hosting.Redis" Version="8.2.0" />
+    <ProjectReference Include="..\HftCryptoTrading.ApiService\HftCryptoTrading.ApiService.csproj" />
+    <ProjectReference Include="..\HftCryptoTrading.Saga.MarketDownloader\HftCryptoTrading.Saga.MarketWatcher.csproj" />
+    <ProjectReference Include="..\HftCryptoTrading.Saga.OpenPositionMonitor\HftCryptoTrading.Saga.OpenPositionMonitor.csproj" />
+    <ProjectReference Include="..\HftCryptoTrading.Saga.StrategyEvaluator\HftCryptoTrading.Saga.StrategyEvaluator.csproj" />
+    <ProjectReference Include="..\HftCryptoTrading.Web\HftCryptoTrading.Web.csproj" />
   </ItemGroup>
 
 </Project>

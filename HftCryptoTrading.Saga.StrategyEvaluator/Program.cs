@@ -4,9 +4,11 @@ using HftCryptoTrading.Saga.StrategyEvaluator.Handlers;
 using HftCryptoTrading.Saga.StrategyEvaluator.Indicators;
 using HftCryptoTrading.Saga.StrategyEvaluator.Workers;
 using HftCryptoTrading.ServiceDefaults;
-using HftCryptoTrading.Shared;
+using HftCryptoTrading.Shared.Metrics;
+using HftCryptoTrading.Shared.Saga;
 using MediatR;
-using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Caching.Distributed;
+using Microsoft.Extensions.Options;
 using StrategyExecution;
 
 AppDomain.CurrentDomain.UnhandledException += (object sender, UnhandledExceptionEventArgs e) =>
@@ -41,22 +43,26 @@ builder.Services.AddSingleton<ExchangeProviderFactory>(sp =>
 {
     var loggerFactory = sp.GetRequiredService<ILoggerFactory>();
     var mediatR = sp.GetRequiredService<IMediator>();
+    var distributedCache = sp.GetRequiredService<IDistributedCache>();
 
-    ExchangeProviderFactory.RegisterExchange("Binance", loggerFactory, (appSettings, loggerFactory) => new BinanceDownloadMarketClient(appSettings,
-        loggerFactory.CreateLogger<BinanceDownloadMarketClient>(), mediatR));
+    ExchangeProviderFactory.RegisterExchange("Binance", loggerFactory, (appSettings, loggerFactory) => 
+    new BinanceDownloadMarketClient(appSettings,
+        loggerFactory.CreateLogger<BinanceDownloadMarketClient>(), mediatR, distributedCache));
 
     return new ExchangeProviderFactory(loggerFactory);
 });
 
 builder.Services.AddMediatR(option =>
 {
-    option.RegisterServicesFromAssembly(typeof(ReceiveSymbolAnaylsePriceHandler).Assembly);
+    option.RegisterServicesFromAssembly(typeof(DownloadSymbolHistoryEventHandler).Assembly);
 });
 
 builder.Services.AddActivatedSingleton(sp =>
 {
-    StrategyLoaderService.Initialize(sp);
-    return StrategyLoaderService.Service;
+    var strategyLoaderService = new StrategyLoaderService(sp.GetRequiredService<IMetricService>());
+    var appsettings = sp.GetRequiredService<IOptions<AppSettings>>().Value;
+    strategyLoaderService.LoadStrategies(appsettings.Runtime.StrategiesPath);
+    return strategyLoaderService;
 });
 
 builder.Services.AddActivatedSingleton(sp =>
@@ -76,9 +82,11 @@ builder.Services.AddSingleton<ExchangeProviderFactory>(sp =>
 {
     var loggerFactory = sp.GetRequiredService<ILoggerFactory>();
     var mediatR = sp.GetRequiredService<IMediator>();
+    var distributedCache = sp.GetRequiredService<IDistributedCache>();
 
-    ExchangeProviderFactory.RegisterExchange("Binance", loggerFactory, (appSettings, loggerFactory) => new BinanceDownloadMarketClient(appSettings,
-        loggerFactory.CreateLogger<BinanceDownloadMarketClient>(), mediatR));
+    ExchangeProviderFactory.RegisterExchange("Binance", loggerFactory, (appSettings, loggerFactory) => 
+    new BinanceDownloadMarketClient(appSettings,
+        loggerFactory.CreateLogger<BinanceDownloadMarketClient>(), mediatR, distributedCache));
 
     return new ExchangeProviderFactory(loggerFactory);
 });

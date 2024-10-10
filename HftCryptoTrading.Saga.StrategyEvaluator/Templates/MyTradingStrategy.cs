@@ -1,7 +1,4 @@
 ﻿using Skender.Stock.Indicators;
-using System.Collections.Generic;
-using System.Linq;
-using HftCryptoTrading.Shared.Strategies;
 
 namespace HftCryptoTrading.Saga.StrategyEvaluator.Templates;
 

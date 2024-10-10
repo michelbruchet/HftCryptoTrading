@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace HftCryptoTrading.Shared;
+﻿namespace HftCryptoTrading.Shared;
 
 public record class OperationResult(bool IsSuccess, string? ErrorMessage = null);
 

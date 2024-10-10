@@ -1,0 +1,6 @@
+@HftCryptoTrading.Saga.LongPositionMonitor_HostAddress = http://localhost:5071
+
+GET {{HftCryptoTrading.Saga.LongPositionMonitor_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

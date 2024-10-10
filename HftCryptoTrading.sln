@@ -34,9 +34,13 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Shared", "Shared", "{63C64C
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Saga", "Saga", "{47A74A12-E8EF-4B0A-A062-DA750F06DE0C}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HftCryptoTrading.Saga.MarketDownloader", "HftCryptoTrading.Saga.MarketDownloader\HftCryptoTrading.Saga.MarketDownloader.csproj", "{9D8B2DAB-66EC-48DD-A1F9-D9C51873CCB6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HftCryptoTrading.Saga.MarketWatcher", "HftCryptoTrading.Saga.MarketDownloader\HftCryptoTrading.Saga.MarketWatcher.csproj", "{9D8B2DAB-66EC-48DD-A1F9-D9C51873CCB6}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HftCryptoTrading.Saga.StrategyEvaluator", "HftCryptoTrading.Saga.StrategyEvaluator\HftCryptoTrading.Saga.StrategyEvaluator.csproj", "{0BAD285F-8DC5-49B1-8AC6-8C3456F06EF6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HftCryptoTrading.Services", "HftCryptoTrading.Services\HftCryptoTrading.Services.csproj", "{8B07A1C4-77A4-4065-B619-714C67207ED3}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HftCryptoTrading.Saga.OpenPositionMonitor", "HftCryptoTrading.Saga.OpenPositionMonitor\HftCryptoTrading.Saga.OpenPositionMonitor.csproj", "{72F3CF9E-8C59-4BF4-902E-ABB551855963}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -92,6 +96,14 @@ Global
 		{0BAD285F-8DC5-49B1-8AC6-8C3456F06EF6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0BAD285F-8DC5-49B1-8AC6-8C3456F06EF6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0BAD285F-8DC5-49B1-8AC6-8C3456F06EF6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8B07A1C4-77A4-4065-B619-714C67207ED3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8B07A1C4-77A4-4065-B619-714C67207ED3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8B07A1C4-77A4-4065-B619-714C67207ED3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8B07A1C4-77A4-4065-B619-714C67207ED3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{72F3CF9E-8C59-4BF4-902E-ABB551855963}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{72F3CF9E-8C59-4BF4-902E-ABB551855963}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{72F3CF9E-8C59-4BF4-902E-ABB551855963}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{72F3CF9E-8C59-4BF4-902E-ABB551855963}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -108,6 +120,8 @@ Global
 		{0843E966-14CF-4F53-8255-D41AE02CA5B1} = {6EDD07D3-EA33-4D5B-93A3-CC90E8B0A28D}
 		{9D8B2DAB-66EC-48DD-A1F9-D9C51873CCB6} = {47A74A12-E8EF-4B0A-A062-DA750F06DE0C}
 		{0BAD285F-8DC5-49B1-8AC6-8C3456F06EF6} = {47A74A12-E8EF-4B0A-A062-DA750F06DE0C}
+		{8B07A1C4-77A4-4065-B619-714C67207ED3} = {6EDD07D3-EA33-4D5B-93A3-CC90E8B0A28D}
+		{72F3CF9E-8C59-4BF4-902E-ABB551855963} = {47A74A12-E8EF-4B0A-A062-DA750F06DE0C}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {FA8877F1-9449-44BF-883F-5E32330E468B}
