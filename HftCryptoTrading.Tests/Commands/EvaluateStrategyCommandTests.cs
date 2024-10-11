@@ -42,7 +42,7 @@ public class EvaluateStrategyCommandTests
             Directory.Delete(path, true);
 
         StrategyLoaderService StrategyLoaderService = new StrategyLoaderService(_metricServiceMock.Object);
-        var command = new EvaluateStrategyCommand(_metricServiceMock.Object, _loggerFactory, _strategySaga.Object, StrategyLoaderService);
+        var command = new EvaluateStrategyCommand(_metricServiceMock.Object, _loggerFactory.CreateLogger<EvaluateStrategyCommand>(), _strategySaga.Object, StrategyLoaderService);
 
         // Simulate a directory and files
         Directory.CreateDirectory(path);
@@ -109,7 +109,8 @@ public class EvaluateStrategyCommandTests
                 }");
 
             // Act
-            var command = new EvaluateStrategyCommand(_metricServiceMock.Object, _loggerFactory, _strategySaga.Object, StrategyLoaderService);
+            var command = new EvaluateStrategyCommand(_metricServiceMock.Object, _loggerFactory.CreateLogger<EvaluateStrategyCommand>(), _strategySaga.Object, 
+                StrategyLoaderService);
             StrategyLoaderService.LoadStrategies(path);
 
             DownloadSymbolHistoryEvent notification = CreateSimpleEventData();

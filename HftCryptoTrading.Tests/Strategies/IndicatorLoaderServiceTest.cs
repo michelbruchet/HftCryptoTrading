@@ -1,4 +1,5 @@
 ﻿using HftCryptoTrading.Saga.StrategyEvaluator.Indicators;
+using HftCryptoTrading.Saga.StrategyEvaluator.Strategies;
 using HftCryptoTrading.Shared.Metrics;
 using HftCryptoTrading.Shared.Strategies;
 using Microsoft.AspNetCore.Routing;
@@ -131,9 +132,6 @@ public class IndicatorLoaderServiceTest
 
         var testIndicatorsPath = Path.Combine(dirPath, "MyCustomIndicator.cs");
 
-        if (File.Exists(testIndicatorsPath))
-            File.Delete(testIndicatorsPath);
-
         // Arrange
         var validCode = @"
             public class MyCustomIndicator : IIndicator
@@ -152,7 +150,7 @@ public class IndicatorLoaderServiceTest
         var quotes = new List<Quote> { new Quote { Close = 100 }, new Quote { Close = 200 } };
 
         // Act
-        var result = _indicatorLoaderService.ExecuteIndicator("MyCustomIndicator", quotes);
+        var result = CustomIndicatorWrapper.CustomIndicator(quotes, "MyCustomIndicator");
 
         // Assert
         Assert.NotNull(result);

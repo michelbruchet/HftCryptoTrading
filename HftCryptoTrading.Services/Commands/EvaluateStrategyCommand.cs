@@ -8,7 +8,7 @@ using StrategyExecution;
 namespace HftCryptoTrading.Services.Processes;
 
 public class EvaluateStrategyCommand(IMetricService metricService, 
-    ILoggerFactory loggerFactory, 
+    ILogger<EvaluateStrategyCommand> logger, 
     IStrategyAnalyserSaga saga,
     StrategyLoaderService strategyLoaderService
     )
@@ -51,7 +51,7 @@ public class EvaluateStrategyCommand(IMetricService metricService,
         catch (Exception ex)
         {
             metricService.TrackFailure($"Run EvaluateStrategyCommand for {notification.Event.SymbolData.Name} failed", ex);
-            loggerFactory.CreateLogger<EvaluateStrategyCommand>().LogError(ex, "Failed to evaluate strategy.");
+            logger.LogError(ex, "Failed to evaluate strategy.");
             throw; // Re-throwing to maintain the original behavior.
         }
     }

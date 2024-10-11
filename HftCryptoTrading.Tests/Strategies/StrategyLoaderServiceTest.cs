@@ -151,7 +151,7 @@ public class StrategyLoaderServiceTest
     [Fact]
     public void AddStrategy_FileNotFound_ShouldThrowFileNotFoundException()
     {
-        var path = new DirectoryInfo("strategies").FullName;
+        var path = new DirectoryInfo($"strategies_{DateTime.UtcNow.ToString("ddMMyymmHHss")}").FullName;
         var strategyLoaderService = new StrategyLoaderService(_metricServiceMock.Object);
 
         if (Directory.Exists(path))
