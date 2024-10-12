@@ -5,7 +5,7 @@ using Microsoft.Extensions.Options;
 
 namespace HftCryptoTrading.Saga.MarketWatcher.Handlers;
 
-public class PublishedSymbolsDownloadedHandler(IServiceProvider serviceProvider, IOptions<AppSettings> appSettings, ILogger<PublishedSymbolsDownloadedHandler> logger) : IRequestHandler<PublishedDownloadedSymbolsEvent>
+public class PublishedDownloadedSymbolsHandler(IServiceProvider serviceProvider, IOptions<AppSettings> appSettings, ILogger<PublishedDownloadedSymbolsHandler> logger) : IRequestHandler<PublishedDownloadedSymbolsEvent>
 {
     public async Task Handle(PublishedDownloadedSymbolsEvent notification, CancellationToken cancellationToken)
     {

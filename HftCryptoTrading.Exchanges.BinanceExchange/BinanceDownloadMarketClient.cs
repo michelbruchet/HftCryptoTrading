@@ -29,8 +29,8 @@ public class BinanceDownloadMarketClient : IExchangeClient
 
     public string ExchangeName => "Binance";
 
-    public BinanceDownloadMarketClient(AppSettings appSettings, 
-        ILogger<BinanceDownloadMarketClient> logger, 
+    public BinanceDownloadMarketClient(AppSettings appSettings,
+        ILogger<BinanceDownloadMarketClient> logger,
         IMediator mediator,
         IDistributedCache distributedCache
         )
@@ -39,9 +39,9 @@ public class BinanceDownloadMarketClient : IExchangeClient
 
         BinanceRestClient.SetDefaultOptions(options =>
         {
-            options.ApiCredentials = new CryptoExchange.Net.Authentication.ApiCredentials(appSettings.Binance.ApiKey, appSettings.Binance.ApiSecret);
+            options.ApiCredentials = new CryptoExchange.Net.Authentication.ApiCredentials(appSettings.Exchange.ApiKey, appSettings.Exchange.ApiSecret);
             options.CachingEnabled = true;
-            options.Environment = appSettings.Binance.IsBackTest ?
+            options.Environment = appSettings.Exchange.IsBackTest ?
                 Binance.Net.BinanceEnvironment.Testnet : Binance.Net.BinanceEnvironment.Live;
             options.AutoTimestamp = true;
             options.CachingMaxAge = TimeSpan.FromMinutes(15);
@@ -50,8 +50,8 @@ public class BinanceDownloadMarketClient : IExchangeClient
 
         BinanceSocketClient.SetDefaultOptions(options =>
         {
-            options.ApiCredentials = new CryptoExchange.Net.Authentication.ApiCredentials(appSettings.Binance.ApiKey, appSettings.Binance.ApiSecret);
-            options.Environment = appSettings.Binance.IsBackTest ?
+            options.ApiCredentials = new CryptoExchange.Net.Authentication.ApiCredentials(appSettings.Exchange.ApiKey, appSettings.Exchange.ApiSecret);
+            options.Environment = appSettings.Exchange.IsBackTest ?
                 Binance.Net.BinanceEnvironment.Testnet : Binance.Net.BinanceEnvironment.Live;
             options.RateLimiterEnabled = true;
         });
@@ -79,8 +79,8 @@ public class BinanceDownloadMarketClient : IExchangeClient
         var key = $"symbols_{ExchangeName}";
 
         var cachedSymbols = await _distributedCache.GetAsync(key);
-        
-        if(cachedSymbols != null )
+
+        if (cachedSymbols != null)
         {
             var symbols = MessagePackSerializer.Deserialize<List<SymbolData>>(cachedSymbols);
             return symbols;
@@ -135,21 +135,21 @@ public class BinanceDownloadMarketClient : IExchangeClient
     }
     public async Task<List<TickerData>> GetCurrentTickersAsync()
     {
-        // Retrieve current ticker prices from Binance
+        // Retrieve current ticker prices from Exchange
         var key = $"tickers_{ExchangeName}";
 
         var cacheData = await _distributedCache.GetAsync(key);
 
-        if(cacheData != null)
+        if (cacheData != null)
         {
             return MessagePackSerializer.Deserialize<List<TickerData>>(cacheData);
         }
 
         var tickersResult = await _binanceExchangeClient.SpotApi
             .SharedClient.GetSpotTickersAsync(new CryptoExchange.Net.SharedApis.GetTickersRequest
-        {
-            TradingMode = CryptoExchange.Net.SharedApis.TradingMode.Spot
-        });
+            {
+                TradingMode = CryptoExchange.Net.SharedApis.TradingMode.Spot
+            });
 
         // Check if the request was successful
         if (!tickersResult.Success)
@@ -169,12 +169,12 @@ public class BinanceDownloadMarketClient : IExchangeClient
             ChangePercentage = t.ChangePercentage
         }).ToList();
 
-        await _distributedCache.SetAsync(key, 
-            MessagePackSerializer.Serialize(tickerDataList), 
+        await _distributedCache.SetAsync(key,
+            MessagePackSerializer.Serialize(tickerDataList),
             new DistributedCacheEntryOptions
-        {
-            AbsoluteExpiration = new DateTimeOffset(DateTime.Today.AddDays(1)),
-        });
+            {
+                AbsoluteExpiration = new DateTimeOffset(DateTime.Today.AddDays(1)),
+            });
 
         // Return the list of mapped ticker data
         return tickerDataList;
@@ -236,7 +236,7 @@ public class BinanceDownloadMarketClient : IExchangeClient
 
         var subscriptionResult = await _binanceSocketExchangeClient.SpotApi.ExchangeData.SubscribeToTickerUpdatesAsync(symboles, async data =>
         {
-            // When Binance sends a price update, publish the event via MediatR
+            // When Exchange sends a price update, publish the event via MediatR
             var symbolTicker = notification?.ValidSymbols?.FirstOrDefault(s => s.Symbol.Name == data.Data.Symbol);
 
             if (symbolTicker != null)
@@ -296,30 +296,33 @@ public class BinanceDownloadMarketClient : IExchangeClient
         var openOrders = await _binanceExchangeClient.SpotApi
             .Trading.GetOpenOrdersAsync();
 
-        return openOrders.Data.Select(o => new OpenOrder(o.Symbol, ExchangeName)
-        {
-            ClientOrderId = o.ClientOrderId,
-            UpdateTime = o.UpdateTime,
-            IsIsolated = o.IsIsolated,
-            Status = (OrderStatus)o.Status,
-            QuoteQuantityFilled = o.QuoteQuantityFilled,
-            QuoteQuantity = o.QuoteQuantity,
-            QuantityFilled = o.QuantityFilled,
-            Quantity = o.Quantity,
-            CreateTime = o.CreateTime,
-            IcebergQuantity = o.IcebergQuantity,
-            Id = o.Id,
-            IsWorking = o.IsWorking,
-            OrderListId = o.OrderListId,
-            OriginalClientOrderId = o.OriginalClientOrderId,
-            Price = o.Price,
-            SelfTradePreventionMode = (int)o.SelfTradePreventionMode,
-            Side = (int)o.Side,
-            StopPrice = o.StopPrice,
-            TimeInForce = (int)o.TimeInForce,
-            Type = (int)o.Type,
-            WorkingTime = o.WorkingTime
-        }).ToList();
+        if (openOrders.Success && openOrders.Data.Any())
+            return openOrders.Data.Select(o => new OpenOrder(o.Symbol, ExchangeName)
+            {
+                ClientOrderId = o.ClientOrderId,
+                UpdateTime = o.UpdateTime,
+                IsIsolated = o.IsIsolated,
+                Status = (OrderStatus)o.Status,
+                QuoteQuantityFilled = o.QuoteQuantityFilled,
+                QuoteQuantity = o.QuoteQuantity,
+                QuantityFilled = o.QuantityFilled,
+                Quantity = o.Quantity,
+                CreateTime = o.CreateTime,
+                IcebergQuantity = o.IcebergQuantity,
+                Id = o.Id,
+                IsWorking = o.IsWorking,
+                OrderListId = o.OrderListId,
+                OriginalClientOrderId = o.OriginalClientOrderId,
+                Price = o.Price,
+                SelfTradePreventionMode = (int)o.SelfTradePreventionMode,
+                Side = (int)o.Side,
+                StopPrice = o.StopPrice,
+                TimeInForce = (int)o.TimeInForce,
+                Type = (int)o.Type,
+                WorkingTime = o.WorkingTime
+            }).ToList();
+        else
+            return [];
     }
 
     public async Task<PlaceOrderResult> PlaceMarketOrder(PlaceOrder placeOrder)
@@ -340,7 +343,7 @@ public class BinanceDownloadMarketClient : IExchangeClient
             } : null, !placeOrderResult.Success ? placeOrderResult.Error.Message : null);
     }
 
-    public async Task TrackPlaceOrder()
+    public async Task TrackUserStream()
     {
         var listenKeyResult = await _binanceExchangeClient.SpotApi.Account.StartUserStreamAsync();
 
@@ -356,8 +359,8 @@ public class BinanceDownloadMarketClient : IExchangeClient
         var subscriptionResult = await _binanceSocketExchangeClient.SpotApi.Account.SubscribeToUserDataUpdatesAsync(
             listenKey,
             onOrderUpdateMessage: (orderUpdate) => OnOrderUpdated?.Invoke(this, ParseOrderUpdate(orderUpdate)),
-           onAccountPositionMessage: (positionUpdate) => OnAccountPositionUpdated?.Invoke(this, ParseAccountPositionUpdate(positionUpdate)),
-            onAccountBalanceUpdate: (balanceUpdate) => OnAccountBalanceUpdated?.Invoke(this, ParseAccountBalanceUpdate(balanceUpdate))
+            onAccountPositionMessage: (position) => OnAccountPositionUpdated?.Invoke(this, ParseAccountPositionUpdate(position)),
+            onAccountBalanceUpdate: (balance) => OnAccountBalanceUpdated?.Invoke(this, ParseAccountBalanceUpdate(balance))
         );
 
         if (!subscriptionResult.Success)
@@ -381,22 +384,22 @@ public class BinanceDownloadMarketClient : IExchangeClient
             Asset = balanceUpdate.Data.Asset,
             BalanceDelta = balanceUpdate.Data.BalanceDelta,
             ClearTime = balanceUpdate.Data.ClearTime,
-            ListenKey= balanceUpdate.Data.ListenKey
+            ListenKey = balanceUpdate.Data.ListenKey
         });
     }
 
     private AccountPositionUpdateEvent ParseAccountPositionUpdate(DataEvent<BinanceStreamPositionsUpdate> positionUpdate)
     {
-        return new AccountPositionUpdateEvent(ExchangeName, positionUpdate.Symbol, new
-                AccountPosition(ExchangeName, positionUpdate.Symbol)
+        return new AccountPositionUpdateEvent(ExchangeName, new
+                AccountPosition(ExchangeName)
         {
             ListenKey = positionUpdate.Data.ListenKey,
             Timestamp = positionUpdate.Data.Timestamp,
             Balances = positionUpdate.Data.Balances.Select(x => new StreamBalance
             {
                 Asset = x.Asset,
-                Available= x.Available,
-                Locked= x.Locked,
+                Available = x.Available,
+                Locked = x.Locked,
                 Total = x.Total
             }).ToList()
         });
@@ -446,7 +449,7 @@ public class BinanceDownloadMarketClient : IExchangeClient
         });
     }
 
-    public async Task<IEnumerable<AccountPosition>> GetCurrentPositions()
+    public async Task<AccountPosition> GetCurrentPositions()
     {
         var getAccountInfo = await _binanceSocketExchangeClient.SpotApi.Account.GetAccountInfoAsync();
 
@@ -455,7 +458,10 @@ public class BinanceDownloadMarketClient : IExchangeClient
             throw new Exception($"can not get account info : {getAccountInfo.Error}");
         }
 
-        var accountPositions = new List<AccountPosition>();
+        var accountPositions = new AccountPosition(ExchangeName)
+        {
+            Balances = []
+        };
 
         foreach (var balance in getAccountInfo.Data.Result.Balances)
         {
@@ -469,17 +475,7 @@ public class BinanceDownloadMarketClient : IExchangeClient
                     Total = balance.Total
                 };
 
-                // Create an AccountPosition per balance
-                var accountPosition = new AccountPosition(
-                    exchange: ExchangeName, // Ou tout autre exchange si tu en utilises plusieurs
-                    symbol: balance.Asset)
-                {
-                    Timestamp = DateTime.UtcNow, // Moment de la récupération
-                    ListenKey = "", // Peut être mis à jour si nécessaire
-                    Balances = new List<StreamBalance> { streamBalance }
-                };
-
-                accountPositions.Add(accountPosition);
+                accountPositions.Balances.Add(streamBalance);
             }
         }
 
@@ -526,7 +522,7 @@ public class BinanceDownloadMarketClient : IExchangeClient
                     if (!groupedBalances.ContainsKey(baseAsset))
                     {
                         groupedBalances[baseAsset] = new AccountBalance(
-                            exchange: "Binance",
+                            exchange: ExchangeName,
                             symbol: baseAsset)
                         {
                             Timestamp = DateTime.UtcNow,
@@ -543,5 +539,10 @@ public class BinanceDownloadMarketClient : IExchangeClient
         }
 
         return groupedBalances.Values.ToList();
+    }
+
+    public Task TrackPosition()
+    {
+        throw new NotImplementedException();
     }
 }

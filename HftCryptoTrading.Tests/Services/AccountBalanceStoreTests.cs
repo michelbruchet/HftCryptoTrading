@@ -22,7 +22,7 @@ public class AccountBalanceStoreTests
     public void AddRange_AddsNewBalances()
     {
         // Arrange
-        var exchangeName = "Binance";
+        var exchangeName = "Exchange";
         var balances = new List<AccountBalance>
         {
             new AccountBalance(exchangeName, "BTC") { ListenKey = "key1", Available = 1.5m },
@@ -41,7 +41,7 @@ public class AccountBalanceStoreTests
     public void AddRange_UpdatesExistingBalances()
     {
         // Arrange
-        var exchangeName = "Binance";
+        var exchangeName = "Exchange";
         var initialBalances = new List<AccountBalance>
         {
             new AccountBalance(exchangeName, "BTC") { ListenKey = "key1", Available = 1.5m }
@@ -65,7 +65,7 @@ public class AccountBalanceStoreTests
     public async Task SetBalance_UpdatesExistingBalance()
     {
         // Arrange
-        var exchangeName = "Binance";
+        var exchangeName = "Exchange";
         var initialBalance = new AccountBalance(exchangeName, "BTC") { ListenKey = "key1", Available = 1.5m };
         _accountBalanceStore.AddRange(exchangeName, new[] { initialBalance });
 
@@ -85,7 +85,7 @@ public class AccountBalanceStoreTests
     public async Task SetBalance_AddsNewBalanceIfNotExists()
     {
         // Arrange
-        var exchangeName = "Binance";
+        var exchangeName = "Exchange";
         var notification = new AccountBalanceUpdateEvent(exchangeName, "ETH", 
             new AccountBalanceUpdate(exchangeName, "ETH") { ListenKey = "key2", BalanceDelta = 1.0m });
 
@@ -101,7 +101,7 @@ public class AccountBalanceStoreTests
     public void AddRange_DoesNothingWhenBalancesAreNull()
     {
         // Arrange
-        var exchangeName = "Binance";
+        var exchangeName = "Exchange";
         IEnumerable<AccountBalance> balances = null;
 
         // Act

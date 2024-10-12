@@ -10,7 +10,7 @@ namespace HftCryptoTrading.Saga.MarketWatcher.Handlers;
 public class PriceChangeDetectedHandler(
     IServiceProvider serviceProvider,
     IOptions<AppSettings> appSettings,
-    ILogger<PublishedSymbolsDownloadedHandler> logger)
+    ILogger<PublishedDownloadedSymbolsHandler> logger)
     : INotificationHandler<PriceChangeDetectedEvent>
 {
     public async Task Handle(PriceChangeDetectedEvent notification, CancellationToken cancellationToken)

@@ -7,12 +7,10 @@ public class AccountPositionUpdateEvent : INotification
 {
     public AccountPosition Position { get; private set; }
     public string Exchange { get; private set; }
-    public string Symbol { get; private set; }
 
-    public AccountPositionUpdateEvent(string exchange, string symbol, AccountPosition position)
+    public AccountPositionUpdateEvent(string exchange, AccountPosition position)
     {
         Exchange = exchange;
-        Symbol = symbol;
         Position = position;
     }
 }

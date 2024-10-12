@@ -5,7 +5,27 @@ using System.Diagnostics.Contracts;
 
 namespace HftCryptoTrading.Client;
 
-public class HubClientPublisher : IMessageHub
+public interface IHubClientPublisherFactory
+{
+    IHubClientPublisher Initialize(AppSettings appSetting, string name);
+}
+
+public class HubClientPublisherFactory : IHubClientPublisherFactory
+{
+    public IHubClientPublisher Initialize(AppSettings appSetting, string name)
+    {
+        return new HubClientPublisher(appSetting, name);
+    }
+}
+
+public interface IHubClientPublisher : IMessageHub
+{
+    Task StartAsync(string @namespace);
+    Task StopAsync();
+    Task<OperationResult> BroadcastEvent<T>(Guid id, string @namespace, T message);
+}
+
+public class HubClientPublisher : IHubClientPublisher
 {
     private readonly HubConnection _connection;
     private string _namespace;
@@ -82,9 +102,11 @@ public class HubClientPublisher : IMessageHub
     {
         ArgumentNullException.ThrowIfNull(message, nameof(message));
         ArgumentException.ThrowIfNullOrWhiteSpace(@namespace, nameof(@namespace));
-        ArgumentException.ThrowIfNullOrWhiteSpace(_eventName, nameof(_eventName));
 
-        if(id == Guid.Empty) throw new ArgumentNullException(nameof(id));
+        if(string.IsNullOrWhiteSpace(_eventName))
+            _eventName = typeof(T).Name;
+
+        if (id == Guid.Empty) throw new ArgumentNullException(nameof(id));
 
         Contract.EndContractBlock();
 

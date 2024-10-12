@@ -1,4 +1,4 @@
-﻿public class BinanceSetting
+﻿public class ExchangeSettings
 {
     public string ApiKey { get; set; }
     public string ApiSecret { get; set; }
@@ -28,7 +28,7 @@ public class Trading
 public class AppSettings
 {
     public int LimitSymbolsMarket { get; set; }
-    public BinanceSetting Binance { get; set; }
+    public ExchangeSettings Exchange { get; set; }
     public HubSetting Hub { get; set; }
     public RuntimeSetting Runtime { get; set; }
     public Trading Trading { get; set; }

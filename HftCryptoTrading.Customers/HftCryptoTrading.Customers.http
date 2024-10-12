@@ -1,0 +1,6 @@
+@HftCryptoTrading.Customers_HostAddress = http://localhost:5053
+
+GET {{HftCryptoTrading.Customers_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

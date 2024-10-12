@@ -19,8 +19,6 @@ public partial class MessageHub : Hub<IClientMessageHub>, IMessageHub, IHubClien
 {
     private const int _maxCacheDuration = 30;
 
-    private static readonly ConcurrentDictionary<string, int> _groups = new();
-    private static readonly ConcurrentDictionary<string, List<(DateTime Timestamp, EventMessage Message, string SenderConnectionId)>> _unbroadcastedMessages = new();
     private ILogger<MessageHub> _logger;
     private MessageService _messageService;
 

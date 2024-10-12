@@ -5,11 +5,11 @@ using Microsoft.Extensions.Options;
 
 namespace HftCryptoTrading.Saga.MarketWatcher.Handlers;
 
-public class PublishSymbolsDownloadedAnalysedSuccessFullyHandler(ExchangeProviderFactory exchangeProvider, 
+public class PublishSymbolsDownloadedAnalysedSuccessFullyHandler(IExchangeProviderFactory exchangeProvider, 
     IOptions<AppSettings> appSettings, 
     ILoggerFactory loggerFactory) : IRequestHandler<PublishSymbolAnalysedSuccessFullyEvent>
 {
-    ExchangeProviderFactory _exchangeProvider = exchangeProvider;
+    IExchangeProviderFactory _exchangeProvider = exchangeProvider;
 
     public async Task Handle(PublishSymbolAnalysedSuccessFullyEvent notification, CancellationToken cancellationToken)
     {

@@ -14,7 +14,8 @@ using System.Threading.Tasks;
 
 namespace HftCryptoTrading.Services.Commands;
 
-public class SymbolAnalysisHelper(IDistributedCache cacheService, ILogger logger, IMetricService metricService, IMarketWatcherSaga saga) 
+public class SymbolAnalysisHelper(IDistributedCache cacheService, ILogger<SymbolAnalysisHelper> logger, 
+    IMetricService metricService) 
     : ISymbolAnalysisHelper
 {
     private const string VolumeHistoryKeyPrefix = "VolumeHistory_";
@@ -121,25 +122,5 @@ public class SymbolAnalysisHelper(IDistributedCache cacheService, ILogger logger
     
             return isAbnormalSpread;
         }
-    }
-
-    public async Task PublishAnalysisResults(
-        string exchangeName,
-        ConcurrentDictionary<string, SymbolTickerData> abnormalVolumes,
-        ConcurrentDictionary<string, SymbolTickerData> abnormalPrices,
-        ConcurrentDictionary<string, SymbolTickerData> abnormalSpreads,
-        ConcurrentDictionary<string, SymbolTickerData> validSymbols)
-    {
-        if (!abnormalVolumes.IsEmpty)
-            await saga.PublishDownloadedSymbolAnalysedVolumeFailed(exchangeName, abnormalVolumes.Values.ToList());
-
-        if (!abnormalSpreads.IsEmpty)
-            await saga.PublishDownloadedSymbolAnalysedSpreadBidAskFailed(exchangeName, abnormalSpreads.Values.ToList());
-
-        if (!abnormalPrices.IsEmpty)
-            await saga.PublishDownloadedSymbolAnalysedPriceFailed(exchangeName, abnormalPrices.Values.ToList());
-
-        if (!validSymbols.IsEmpty)
-            await saga.PublishDownloadedSymbolAnalysedSuccessFully(exchangeName, validSymbols.Values.ToList());
     }
 }

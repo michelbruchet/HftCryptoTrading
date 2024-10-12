@@ -3,10 +3,9 @@ using System.Text.Json.Serialization;
 
 namespace HftCryptoTrading.Shared.Models;
 
-public class AccountPosition(string exchange, string symbol)
+public class AccountPosition(string exchange)
 {
     public string Exchange => exchange;
-    public string Symbol => symbol;
     /// <summary>
     /// Time of last account update
     /// </summary>

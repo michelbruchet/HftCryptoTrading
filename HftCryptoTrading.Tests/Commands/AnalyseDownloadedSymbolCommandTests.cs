@@ -21,15 +21,19 @@ using HftCryptoTrading.Shared.Models;
 using HftCryptoTrading.Shared.Saga;
 using MessagePack;
 using HftCryptoTrading.Services.Commands;
+using HftCryptoTrading.Exchanges.Core.Exchange;
+using Microsoft.Extensions.Options;
 
 public class AnalyseDownloadedSymbolCommandTests
 {
     private readonly Mock<IDistributedCache> _mockCacheService;
+    private readonly LoggerFactory loggerFactory;
     private readonly Mock<ILogger<AnalyseDownloadedSymbolCommand>> _mockLogger;
     private readonly Mock<IMetricService> _mockMetricService;
     private readonly Mock<IMarketWatcherSaga> _mockSaga;
     private readonly SymbolAnalysisHelper _symbolAnalysisHelper;
-
+    private readonly Mock<IExchangeProviderFactory> _exchangeFactory;
+    private readonly IOptions<AppSettings> _appSettings;
     private const string VolumeHistoryKeyPrefix = "VolumeHistory_";
     private const string SpreadHistoryKeyPrefix = "SpreadHistory_";
     private const string PriceHistoryKeyPrefix = "PriceHistory_";
@@ -37,11 +41,14 @@ public class AnalyseDownloadedSymbolCommandTests
     public AnalyseDownloadedSymbolCommandTests()
     {
         _mockCacheService = new Mock<IDistributedCache>();
-        _mockLogger = new Mock<ILogger<AnalyseDownloadedSymbolCommand>>();
+        loggerFactory = new LoggerFactory();
         _mockMetricService = new Mock<IMetricService>();
         _mockSaga = new Mock<IMarketWatcherSaga>();
-        _symbolAnalysisHelper = new SymbolAnalysisHelper(_mockCacheService.Object, _mockLogger.Object, 
-            _mockMetricService.Object, _mockSaga.Object);
+        _symbolAnalysisHelper = new SymbolAnalysisHelper(_mockCacheService.Object, loggerFactory.CreateLogger<SymbolAnalysisHelper>(), 
+            _mockMetricService.Object);
+        _exchangeFactory = new Mock<IExchangeProviderFactory>();
+        _appSettings = Options.Create(new AppSettings());
+
     }
 
     [Fact]
@@ -50,10 +57,12 @@ public class AnalyseDownloadedSymbolCommandTests
         // Arrange
         var command = new AnalyseDownloadedSymbolCommand(
             _mockCacheService.Object,
-            _mockLogger.Object,
+            loggerFactory,
             _mockSaga.Object,
             _mockMetricService.Object,
-            _symbolAnalysisHelper
+            _symbolAnalysisHelper,
+            _appSettings,
+            _exchangeFactory.Object
             );
 
         var abnormalPriceEventData = new PublishedDownloadedSymbolsEvent("TestExchange",
@@ -86,13 +95,17 @@ public class AnalyseDownloadedSymbolCommandTests
     [Fact]
     public async Task RunAsync_WithAbnormalVolume()
     {
+        var appSettings = Options.Create(new AppSettings());
+        var exchangeClientFactory = new Mock<IExchangeProviderFactory>();
+
         // Arrange
         var command = new AnalyseDownloadedSymbolCommand(
             _mockCacheService.Object,
-            _mockLogger.Object,
+            loggerFactory,
             _mockSaga.Object,
             _mockMetricService.Object,
-            _symbolAnalysisHelper
+            _symbolAnalysisHelper,
+            appSettings, exchangeClientFactory.Object
             );
 
         var abnormalVolumeEventData = new PublishedDownloadedSymbolsEvent("TestExchange",
@@ -127,13 +140,18 @@ public class AnalyseDownloadedSymbolCommandTests
     [Fact]
     public async Task RunAsync_WithAbnormalSpreadBidAsk()
     {
+        var appSettings = Options.Create(new AppSettings());
+        var exchangeClientFactory = new Mock<IExchangeProviderFactory>();
+
         // Arrange
         var command = new AnalyseDownloadedSymbolCommand(
             _mockCacheService.Object,
-            _mockLogger.Object,
+            loggerFactory,
             _mockSaga.Object,
             _mockMetricService.Object,
-            _symbolAnalysisHelper
+            _symbolAnalysisHelper,
+            appSettings, 
+            exchangeClientFactory.Object
             );
 
         var abnormalSpreadBidAskEventData = new PublishedDownloadedSymbolsEvent("TestExchange",
@@ -166,13 +184,17 @@ public class AnalyseDownloadedSymbolCommandTests
     [Fact]
     public async Task RunAsync_WithValidTicker()
     {
+        var appSettings = Options.Create(new AppSettings());
+        var exchangeClientFactory = new Mock<IExchangeProviderFactory>();
+
         // Arrange
         var command = new AnalyseDownloadedSymbolCommand(
             _mockCacheService.Object,
-            _mockLogger.Object,
+            loggerFactory,
             _mockSaga.Object,
             _mockMetricService.Object,
-            _symbolAnalysisHelper
+            _symbolAnalysisHelper,
+            appSettings, exchangeClientFactory.Object
             );
 
         var validEventData = new PublishedDownloadedSymbolsEvent("TestExchange",
@@ -213,13 +235,17 @@ public class AnalyseDownloadedSymbolCommandTests
     [Fact]
     public async Task RunAsync_WithInValidTicker()
     {
+        var appSettings = Options.Create(new AppSettings());
+        var exchangeClientFactory = new Mock<IExchangeProviderFactory>();
+
         // Arrange
         var command = new AnalyseDownloadedSymbolCommand(
             _mockCacheService.Object,
-            _mockLogger.Object,
+            loggerFactory,
             _mockSaga.Object,
             _mockMetricService.Object,
-            _symbolAnalysisHelper
+            _symbolAnalysisHelper,
+            appSettings, exchangeClientFactory.Object
             );
 
         var validEventData = new PublishedDownloadedSymbolsEvent("TestExchange",
@@ -263,13 +289,18 @@ public class AnalyseDownloadedSymbolCommandTests
     [Fact]
     public async Task RunAsync_WithInValidThenValidTicker()
     {
+        var appSettings = Options.Create(new AppSettings());
+        var exchangeClientFactory = new Mock<IExchangeProviderFactory>();
+
         // Arrange
         var command = new AnalyseDownloadedSymbolCommand(
             _mockCacheService.Object,
-            _mockLogger.Object,
+            loggerFactory,
             _mockSaga.Object,
             _mockMetricService.Object,
-            _symbolAnalysisHelper
+            _symbolAnalysisHelper,
+            appSettings,
+            exchangeClientFactory.Object
             );
 
         var invalidEventData = new PublishedDownloadedSymbolsEvent("TestExchange",

@@ -32,7 +32,7 @@ public class DownloadSymbolCommandTests
     {
         // Arrange
         var symbols = new List<SymbolData> { new SymbolData { Name = "BTC" } };
-        var tickers = new List<TickerData> { new TickerData("BTCUSDT", "Binance") { ChangePercentage = 1, Volume = 100 } };
+        var tickers = new List<TickerData> { new TickerData("BTCUSDT", "Exchange") { ChangePercentage = 1, Volume = 100 } };
 
         _mockExchangeClient.Setup(e => e.GetSymbolsAsync()).ReturnsAsync(symbols);
         _mockExchangeClient.Setup(e => e.GetCurrentTickersAsync()).ReturnsAsync(tickers);
@@ -81,7 +81,7 @@ public class DownloadSymbolCommandTests
     {
         // Arrange
         var symbols = new List<SymbolData> { new SymbolData { Name = "BTC" } };
-        var tickers = new List<TickerData> { new TickerData ("BTCUSDT", "Binance") { ChangePercentage = 1, Volume = 100 } };
+        var tickers = new List<TickerData> { new TickerData ("BTCUSDT", "Exchange") { ChangePercentage = 1, Volume = 100 } };
 
         _mockExchangeClient.Setup(e => e.GetSymbolsAsync()).ReturnsAsync(symbols);
         _mockExchangeClient.Setup(e => e.GetCurrentTickersAsync()).ReturnsAsync(tickers);

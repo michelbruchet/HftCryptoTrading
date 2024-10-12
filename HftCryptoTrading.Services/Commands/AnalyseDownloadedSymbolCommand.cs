@@ -19,6 +19,8 @@ using Polly;
 using Microsoft.CodeAnalysis;
 using System.Collections.Concurrent;
 using HftCryptoTrading.Services.Commands;
+using Microsoft.CodeAnalysis.Operations;
+using Microsoft.Extensions.Options;
 
 public class AnalyseDownloadedSymbolCommand
 {
@@ -27,20 +29,28 @@ public class AnalyseDownloadedSymbolCommand
     private readonly IMetricService _metricService;
     private readonly IMarketWatcherSaga _saga;
     private readonly ISymbolAnalysisHelper _helper;
+    private readonly IExchangeProviderFactory _exchangeProviderFactory;
+    private readonly AppSettings _appSettings;
+    private readonly ILoggerFactory _loggerFactory;
 
     public AnalyseDownloadedSymbolCommand(
         IDistributedCache cacheService,
-        ILogger<AnalyseDownloadedSymbolCommand> logger,
+        ILoggerFactory loggerfactory,
         IMarketWatcherSaga saga,
         IMetricService metricService,
-        ISymbolAnalysisHelper helper
+        ISymbolAnalysisHelper helper,
+        IOptions<AppSettings> appSettings,
+        IExchangeProviderFactory exchangeProviderFactory
         )
     {
         _cacheService = cacheService ?? throw new ArgumentNullException(nameof(cacheService));
-        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        _logger = loggerfactory?.CreateLogger<AnalyseDownloadedSymbolCommand>() ?? throw new ArgumentNullException(nameof(loggerfactory));
         _metricService = metricService ?? throw new ArgumentNullException(nameof(metricService));
         _saga = saga ?? throw new ArgumentNullException(nameof(saga));
         _helper = helper ?? throw new ArgumentNullException(nameof(helper));
+        _exchangeProviderFactory = exchangeProviderFactory ?? throw new ArgumentNullException(nameof(exchangeProviderFactory));
+        _appSettings = appSettings.Value;
+        _loggerFactory = loggerfactory;
     }
 
     public async Task RunAsync(PublishedDownloadedSymbolsEvent @event)
@@ -55,8 +65,15 @@ public class AnalyseDownloadedSymbolCommand
 
             try
             {
+                var symbols = @event.Data.Select(s=>s.Symbol.Name).ToList();
+                var exchangeClient = _exchangeProviderFactory.GetExchange(@event.ExchangeName, _appSettings, _loggerFactory);
+                var bookPrices = await exchangeClient.GetBookPricesAsync(symbols);
+
                 var tasks = @event.Data.Select(async ticker =>
                 {
+
+                    ticker.BookPrice = bookPrices.FirstOrDefault(bp => bp.Symbol == ticker.Symbol.Name);
+
                     var isAbnormalVolume = await _helper.RetryPolicyWrapper(
                         async () => await _helper.IsAbnormalVolume(ticker));
 
@@ -80,8 +97,29 @@ public class AnalyseDownloadedSymbolCommand
                 throw;
             }
 
-            await  _helper.PublishAnalysisResults(@event.ExchangeName, abnormalVolumes, 
+            await  PublishAnalysisResults(@event.ExchangeName, abnormalVolumes, 
                 abnormalPrices, abnormalSpreads, validSymbols);
         }
     }
+
+    async Task PublishAnalysisResults(
+    string exchangeName,
+    ConcurrentDictionary<string, SymbolTickerData> abnormalVolumes,
+    ConcurrentDictionary<string, SymbolTickerData> abnormalPrices,
+    ConcurrentDictionary<string, SymbolTickerData> abnormalSpreads,
+    ConcurrentDictionary<string, SymbolTickerData> validSymbols)
+    {
+        if (!abnormalVolumes.IsEmpty)
+            await _saga.PublishDownloadedSymbolAnalysedVolumeFailed(exchangeName, abnormalVolumes.Values.ToList());
+
+        if (!abnormalSpreads.IsEmpty)
+            await _saga.PublishDownloadedSymbolAnalysedSpreadBidAskFailed(exchangeName, abnormalSpreads.Values.ToList());
+
+        if (!abnormalPrices.IsEmpty)
+            await _saga.PublishDownloadedSymbolAnalysedPriceFailed(exchangeName, abnormalPrices.Values.ToList());
+
+        if (!validSymbols.IsEmpty)
+            await _saga.PublishDownloadedSymbolAnalysedSuccessFully(exchangeName, validSymbols.Values.ToList());
+    }
+
 }

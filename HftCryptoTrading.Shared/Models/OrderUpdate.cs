@@ -14,7 +14,7 @@ public class OrderUpdate(string exchange, string symbol)
     public string Symbol => symbol;
 
     /// <summary>
-    /// The id of the order as assigned by Binance
+    /// The id of the order as assigned by Exchange
     /// </summary>
     [JsonPropertyName("i")]
     public long Id { get; set; }

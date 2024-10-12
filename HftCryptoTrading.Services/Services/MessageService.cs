@@ -27,8 +27,9 @@ public class MessageService(
     private readonly ILogger<MessageService> _logger = logger;
     private const int _maxCacheDuration = 30;
     private readonly IHubClientManager _hubContext = hubContext;
-    private readonly ConcurrentDictionary<string, int> _groups = new();
-    private ConcurrentDictionary<string, List<(DateTime Timestamp, EventMessage Message, string SenderConnectionId)>> _unbroadcastedMessages 
+    
+    private static readonly ConcurrentDictionary<string, int> _groups = new();
+    private static ConcurrentDictionary<string, List<(DateTime Timestamp, EventMessage Message, string SenderConnectionId)>> _unbroadcastedMessages 
         = new();
 
     public MessageService(

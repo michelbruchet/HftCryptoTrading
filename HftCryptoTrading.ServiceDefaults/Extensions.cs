@@ -9,6 +9,7 @@ using Microsoft.Extensions.Logging;
 using OpenTelemetry;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Trace;
+using Serilog;
 
 namespace HftCryptoTrading.ServiceDefaults;
 
@@ -20,6 +21,12 @@ public static class Extensions
     public static IHostApplicationBuilder AddServiceDefaults(this IHostApplicationBuilder builder)
     {
         builder.ConfigureOpenTelemetry();
+
+        builder.Services.AddSerilog(config =>
+        {
+            config.WriteTo.Console();
+            config.ReadFrom.Configuration(builder.Configuration);
+        });
 
         builder.AddDefaultHealthChecks();
 

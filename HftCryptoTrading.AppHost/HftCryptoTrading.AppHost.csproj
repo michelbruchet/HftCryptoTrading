@@ -16,6 +16,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\HftCryptoTrading.ApiService\HftCryptoTrading.ApiService.csproj" />
+    <ProjectReference Include="..\HftCryptoTrading.Customers\HftCryptoTrading.Customers.csproj" />
     <ProjectReference Include="..\HftCryptoTrading.Saga.MarketDownloader\HftCryptoTrading.Saga.MarketWatcher.csproj" />
     <ProjectReference Include="..\HftCryptoTrading.Saga.OpenPositionMonitor\HftCryptoTrading.Saga.OpenPositionMonitor.csproj" />
     <ProjectReference Include="..\HftCryptoTrading.Saga.StrategyEvaluator\HftCryptoTrading.Saga.StrategyEvaluator.csproj" />

@@ -38,7 +38,7 @@ public interface IExchangeClient : IDisposable, IAsyncDisposable
     Task RegisterPriceChangeHandlerAsync(PublishSymbolAnalysedSuccessFullyEvent notification);
     Task<List<OpenOrder>> GetOpenedOrders();
     Task<PlaceOrderResult> PlaceMarketOrder(PlaceOrder placeOrder);
-    Task TrackPlaceOrder();
-    Task<IEnumerable<AccountPosition>> GetCurrentPositions();
+    Task TrackUserStream();
+    Task<AccountPosition> GetCurrentPositions();
     Task<List<AccountBalance>> GetCurrentAccountBalancesGroupedByBaseAsset();
 }

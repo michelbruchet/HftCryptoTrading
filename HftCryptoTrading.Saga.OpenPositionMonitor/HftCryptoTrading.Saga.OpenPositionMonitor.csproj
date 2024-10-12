@@ -17,20 +17,17 @@
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
-		<PackageReference Include="Microsoft.Extensions.Logging" Version="8.0.0" />
+		<PackageReference Include="Microsoft.Extensions.Logging" Version="8.0.1" />
 	</ItemGroup>
 
 	<ItemGroup>
 		<ProjectReference Include="..\HftCryptoTrading.Client\HftCryptoTrading.Client.csproj" />
 		<ProjectReference Include="..\HftCryptoTrading.Core\HftCryptoTrading.Exchanges.Core.csproj" />
+		<ProjectReference Include="..\HftCryptoTrading.Customers.Shared\HftCryptoTrading.Customers.Shared.csproj" />
 		<ProjectReference Include="..\HftCryptoTrading.Exchanges.BinanceExchange\HftCryptoTrading.Exchanges.BinanceExchange.csproj" />
 		<ProjectReference Include="..\HftCryptoTrading.ServiceDefaults\HftCryptoTrading.ServiceDefaults.csproj" />
 		<ProjectReference Include="..\HftCryptoTrading.Services\HftCryptoTrading.Services.csproj" />
 		<ProjectReference Include="..\HftCryptoTrading.Shared\HftCryptoTrading.Shared.csproj" />
-	</ItemGroup>
-
-	<ItemGroup>
-		<Folder Include="Handlers\" />
 	</ItemGroup>
 
 	<ItemGroup>

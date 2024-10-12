@@ -1,3 +1,4 @@
+using HftCryptoTrading.Client;
 using HftCryptoTrading.Exchanges.BinanceExchange;
 using HftCryptoTrading.Exchanges.Core.Exchange;
 using HftCryptoTrading.Saga.MarketWatcher.Handlers;
@@ -36,7 +37,7 @@ builder.Services.AddCors(options =>
 // Bind AppSettings to the configuration section in appsettings.json
 builder.Services.Configure<AppSettings>(builder.Configuration);
 
-builder.Services.AddSingleton<ExchangeProviderFactory>(sp =>
+builder.Services.AddSingleton<IExchangeProviderFactory>(sp =>
 {
     var loggerFactory = sp.GetRequiredService<ILoggerFactory>();
     var mediatR = sp.GetRequiredService<IMediator>();
@@ -53,10 +54,11 @@ builder.Services.AddSingleton<MarketWatcherSagaHost>();
 builder.Services.AddSingleton<IMarketWatcherSaga, MarketWatcherSaga>();
 builder.Services.AddHostedService<MarketWatcherSagaHost>();
 builder.Services.AddSingleton<ISymbolAnalysisHelper, SymbolAnalysisHelper>();
+builder.Services.AddSingleton<IHubClientPublisherFactory, HubClientPublisherFactory>();
 
 builder.Services.AddMediatR(option=>
     {
-        option.RegisterServicesFromAssembly(typeof(PublishedSymbolsDownloadedHandler).Assembly);
+        option.RegisterServicesFromAssembly(typeof(PublishedDownloadedSymbolsHandler).Assembly);
     });
 
 builder.AddRedisDistributedCache("cache", configureOptions: options => options.ConnectTimeout = 3000);

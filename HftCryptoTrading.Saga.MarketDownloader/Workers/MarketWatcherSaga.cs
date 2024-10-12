@@ -12,25 +12,25 @@ public class MarketWatcherSaga : IMarketWatcherSaga
 {
     private readonly AppSettings _appSetting;
     private readonly IMediator _mediator;
-    private readonly ExchangeProviderFactory _factory;
+    private readonly IExchangeProviderFactory _factory;
     private readonly IMetricService _metricService;
     private readonly ILoggerFactory _loggerFactory;
     private readonly List<Task> _downloadTasks = new(); // List to store ongoing tasks
     private readonly CancellationTokenSource _cancellationTokenSource = new(); // Cancellation source to stop tasks
     private readonly TimeSpan _delayBetweenDownloads = TimeSpan.FromHours(5); // Interval of 5 hours between downloads
-    private readonly HubClientPublisher _publisher;
+    private readonly IHubClientPublisher _publisher;
 
     public MarketWatcherSaga(IOptions<AppSettings> appSetting, 
         IMediator mediator, ILoggerFactory loggerFactory, 
-        ExchangeProviderFactory factory, IMetricService metricService)
+        IExchangeProviderFactory factory, IMetricService metricService, IHubClientPublisherFactory hubClientPublisherFactory)
     {
         _appSetting = appSetting.Value;
         _mediator = mediator;
         _factory = factory;
         _metricService = metricService;
         _loggerFactory = loggerFactory;
-       
-        _publisher = new HubClientPublisher(_appSetting, typeof(SymbolAnalysedSuccessFullyEvent).Name);
+
+        _publisher = hubClientPublisherFactory.Initialize(_appSetting, typeof(SymbolAnalysedSuccessFullyEvent).Name);
     }
 
     public async Task StartAsync(CancellationToken cancellationToken)
@@ -47,35 +47,26 @@ public class MarketWatcherSaga : IMarketWatcherSaga
 
         Parallel.ForEach(exchangeNames, async (exchangeName) =>
         {
-            var exchangeClient = _factory.GetExchange(exchangeName, _appSetting, _loggerFactory);
-            
-            if(exchangeClient == null)
-            {
-                var workerProcess = new DownloadSymbolCommand(exchangeClient, _metricService, this, _appSetting);
-                await workerProcess.ExecuteAsync(cancellationToken);
-            }
+            var exchangeClient = _factory.GetExchange(exchangeName, _appSetting, _loggerFactory)!;
+            var downloadSymbolCommand = new DownloadSymbolCommand(exchangeClient, _metricService, this, _appSetting);
+            await downloadSymbolCommand.ExecuteAsync(cancellationToken);
         });
     }
 
     public async Task StopAsync(CancellationToken cancellationToken)
     {
-        // Cancel all background tasks
         _cancellationTokenSource.Cancel();
-
-        // Wait for all tasks to complete
-        try
-        {
-            await Task.WhenAll(_downloadTasks);
-        }
-        catch (OperationCanceledException)
-        {
-            Console.WriteLine("Download processes were canceled.");
-        }
+        await Task.WhenAll(_downloadTasks);
     }
 
     public async Task PublishDownloadedSymbols(string exchangeName, IEnumerable<SymbolTickerData> data)
     {
         await _mediator.Send(new PublishedDownloadedSymbolsEvent(exchangeName, data));
+    }
+
+    public async Task PublishDownloadedSymbolAnalysedSuccessFully(string exchange, List<SymbolTickerData> validSymbols)
+    {
+        await _mediator.Send(new PublishSymbolAnalysedSuccessFullyEvent(exchange, validSymbols));
     }
 
     public Task PublishDownloadedSymbolAnalysedPriceFailed(string exchangeName, List<SymbolTickerData> abnormalPriceSymbols)
@@ -96,10 +87,6 @@ public class MarketWatcherSaga : IMarketWatcherSaga
         return Task.CompletedTask;
     }
 
-    public async Task PublishDownloadedSymbolAnalysedSuccessFully(string exchange, List<SymbolTickerData> validSymbols)
-    {
-        await _mediator.Publish(new PublishSymbolAnalysedSuccessFullyEvent(exchange, validSymbols));
-    }
 
     public Task PublishStreamedSymbolAnalysedPriceFailed(string exchangeName, SymbolTickerData abnormalPriceSymbols)
     {

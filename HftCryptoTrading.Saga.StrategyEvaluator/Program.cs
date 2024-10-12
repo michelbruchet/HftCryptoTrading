@@ -1,9 +1,11 @@
+using HftCryptoTrading.Client;
 using HftCryptoTrading.Exchanges.BinanceExchange;
 using HftCryptoTrading.Exchanges.Core.Exchange;
 using HftCryptoTrading.Saga.StrategyEvaluator.Handlers;
 using HftCryptoTrading.Saga.StrategyEvaluator.Indicators;
 using HftCryptoTrading.Saga.StrategyEvaluator.Workers;
 using HftCryptoTrading.ServiceDefaults;
+using HftCryptoTrading.Services.Commands;
 using HftCryptoTrading.Shared.Metrics;
 using HftCryptoTrading.Shared.Saga;
 using MediatR;
@@ -78,6 +80,8 @@ builder.AddRedisDistributedCache("cache", configureOptions: options => options.C
 // Bind AppSettings to the configuration section in appsettings.json
 builder.Services.Configure<AppSettings>(builder.Configuration);
 
+builder.Services.AddSingleton<IHubClientPublisherFactory, HubClientPublisherFactory>();
+
 builder.Services.AddSingleton<ExchangeProviderFactory>(sp =>
 {
     var loggerFactory = sp.GetRequiredService<ILoggerFactory>();
@@ -92,6 +96,7 @@ builder.Services.AddSingleton<ExchangeProviderFactory>(sp =>
 });
 
 builder.Services.AddHostedService<StrategyAnalyserSagaHost>();
+
 
 var app = builder.Build();
 
